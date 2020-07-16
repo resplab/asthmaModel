@@ -1,4 +1,4 @@
-library(epicR)
+library(asthmaModel)
 context("Exacerbation Tests")
 
 test_that("Exacerbation rates per GOLD stage are not more than 10% off when compared with literature", {

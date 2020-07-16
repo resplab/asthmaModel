@@ -1,4 +1,4 @@
-#' @useDynLib epicR, .registration=TRUE
+#' @useDynLib asthmaModel, .registration=TRUE
 #' @importFrom Rcpp sourceCpp
 #' @importFrom Rcpp evalCpp
 #' @importFrom graphics barplot legend lines pie plot title
@@ -15,6 +15,6 @@
 NULL
 
 .onUnload <- function (libpath) {
-  library.dynam.unload("epicR", libpath)
+  library.dynam.unload("asthmaModel", libpath)
 }
 

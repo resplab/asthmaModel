@@ -32,9 +32,6 @@ Layout:
 
 #define MAX_AGE 111
 
-#define MAX_AGE 111
-
-
 
 enum errors
 {
@@ -474,9 +471,9 @@ struct input
     double weight_0_sd;  //currently, a sample is made at baseline and every one is moved in parallel trajectories
     double height_weight_rho;
 
-    double p_prevalence_age[111]; //age distirbution of prevalent (time_at_creation=0) agents
-    double p_incidence_age[111]; //age distirbution of incident (time_at_creation>0) agents
-    double l_inc_betas[3]; //intercept, clandar year and its square
+    double p_prevalence_age[111]; //age distribution of prevalent (time_at_creation=0) agents
+    double p_incidence_age[111]; //age distribution of incident (time_at_creation>0) agents
+    double l_inc_betas[3]; //intercept, calendar year and its square
     double p_bgd_by_sex[111][2];
     double ln_h_bgd_betas[9]; //intercept, calendar year, its square, age, b_mi, n_mi, b_stroke, n_stroke, hf_status
   } agent;

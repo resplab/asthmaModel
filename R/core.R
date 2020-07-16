@@ -8,7 +8,7 @@ session_env$global_error_message_chain<-NULL
 
 # Cleaning up when package unloads
 .onUnload <- function(libpath) {
-  library.dynam.unload("epicR", libpath)
+  library.dynam.unload("asthmaModel", libpath)
 }
 
 

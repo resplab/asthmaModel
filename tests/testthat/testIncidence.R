@@ -1,4 +1,4 @@
-library(epicR)
+library(asthmaModel)
 context("COPD Incidence")
 
 test_that("COPD incidence is set so that prevalence is independent of calendar year within GOLD and gender stratas", {
