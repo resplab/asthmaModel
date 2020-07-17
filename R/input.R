@@ -18,7 +18,6 @@ medication_classes<-c(
 )
 
 
-
 events<-c(
   event_start=0,
   event_fixed=1,
@@ -276,102 +275,6 @@ init_input <- function() {
   input$exacerbation$logit_p_death_by_sex <- cbind(male = c(intercept = -13, age = log(1.05),  mild = 0, moderate = 0, severe = 7.4, very_severe = 8, n_hist_severe_exac = 0),
                                                    female = c(intercept = -13, age = log(1.05),  mild = 0, moderate = 0, severe = 7.4, very_severe = 8, n_hist_severe_exac = 0))
   input_ref$exacerbation$logit_p_death_by_sex <- ""
-
-  ## Symptoms;
-
-  # cough;
-  input_help$symptoms$logit_p_cough_COPD_by_sex <- "Probability of having cough for COPD patients"
-  input$symptoms$logit_p_cough_COPD_by_sex <- cbind(male=c(intercept=4.4006, age=-0.0412, smoking=0.6036, packyears=0, fev1=-0.9564),
-                                                    female=c(intercept=4.4006-0.9472, age=-0.0412, smoking=0.6036, packyears=0, fev1=-0.9564))
-  input_ref$symptoms$logit_p_cough_COPD_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-22"
-
-  input_help$symptoms$logit_p_cough_nonCOPD_by_sex <- "Probability of having cough for non-COPD patients"
-  input$symptoms$logit_p_cough_nonCOPD_by_sex <- cbind(male=c(intercept=-5.2872, age=0.03429, smoking=0.3786, packyears=0),
-                                                       female=c(intercept=-5.2872+0.2178, age=0.03429, smoking=0.3786, packyears=0))
-  input_ref$symptoms$logit_p_cough_nonCOPD_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-22"
-
-  # phlegm;
-  input_help$symptoms$logit_p_phlegm_COPD_by_sex <- "Probability of having phlegm for COPD patients"
-  input$symptoms$logit_p_phlegm_COPD_by_sex <- cbind(male=c(intercept=3.5726, age=-0.02422, smoking=1.0754, packyears=0, fev1=-1.6443),
-                                                     female=c(intercept=3.5726-2.089, age=-0.02422, smoking=1.0754, packyears=0, fev1=-1.6443))
-  input_ref$symptoms$logit_p_phlegm_COPD_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-22"
-
-  input_help$symptoms$logit_p_phlegm_nonCOPD_by_sex <- "Probability of having phlegm for non-COPD patients"
-  input$symptoms$logit_p_phlegm_nonCOPD_by_sex <- cbind(male=c(intercept=-10.3164, age=0.02771, smoking=0.5865, packyears=0),
-                                                        female=c(intercept=-10.3164-0.3459, age=0.02771, smoking=0.5865, packyears=0))
-  input_ref$symptoms$logit_p_phlegm_nonCOPD_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-22"
-
-  # dyspnea;
-  input_help$symptoms$logit_p_dyspnea_COPD_by_sex <- "Probability of having dyspnea for COPD patients"
-  input$symptoms$logit_p_dyspnea_COPD_by_sex <-  cbind(male=c(intercept=4.8358, age=-0.00891, smoking=0.4177, packyears=0, fev1=-1.9942),
-                                                       female=c(intercept=4.8358-0.6346, age=-0.00891, smoking=0.4177, packyears=0, fev1=-1.9942))
-  input_ref$symptoms$logit_p_dyspnea_COPD_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-22"
-
-  input_help$symptoms$logit_p_dyspnea_nonCOPD_by_sex <- "Probability of having dyspnea for non-COPD patients"
-  input$symptoms$logit_p_dyspnea_nonCOPD_by_sex <- cbind(male=c(intercept=-7.1802, age=0.07002, smoking=0.8388, packyears=0),
-                                                         female=c(intercept=-7.1802+0.9343, age=0.07002, smoking=0.8388, packyears=0))
-  input_ref$symptoms$logit_p_dyspnea_nonCOPD_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-22"
-
-  # wheeze;
-  input_help$symptoms$logit_p_wheeze_COPD_by_sex <- "Probability of having wheeze for COPD patients"
-  input$symptoms$logit_p_wheeze_COPD_by_sex <- cbind(male=c(intercept=14.2686, age=-0.1408, smoking=0.1345, packyears=0, fev1=-2.3122),
-                                                     female=c(intercept=14.2686-1.4995, age=-0.1408, smoking=0.1345, packyears=0, fev1=-2.3122))
-  input_ref$symptoms$logit_p_wheeze_COPD_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-22"
-
-  input_help$symptoms$logit_p_wheeze_nonCOPD_by_sex <- "Probability of having wheeze for non-COPD patients"
-  input$symptoms$logit_p_wheeze_nonCOPD_by_sex <- cbind(male=c(intercept=-6.6284, age=-0.02051, smoking=0.2332, packyears=0),
-                                                        female=c(intercept=-6.6284+0.4671, age=-0.02051, smoking=0.2332, packyears=0))
-  input_ref$symptoms$logit_p_wheeze_nonCOPD_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-22"
-
-  # covraiance matrices for symptoms
-  input_help$symptoms$covariance_COPD <- "Covariance matrix for symptoms random effects in COPD patients"
-  input$symptoms$covariance_COPD<- cbind(cough = c(cough = 2.7934, phlegm =2.11077, wheeze =1.1737, dyspnea = 0.64573),
-                                         phlegm = c(cough = 2.11077, phlegm = 7.0945, wheeze = 1.45258, dyspnea =0.89548),
-                                         wheeze = c(cough = 1.1737, phlegm = 1.45258, wheeze = 7.4793, dyspnea =1.48313),
-                                         dyspnea = c(cough = 0.64573, phlegm = 0.89548, wheeze = 1.48313, dyspnea = 3.6357))
-  input_ref$symptoms$covariance_COPD <- "Kate's regression on CanCOLD, provided on 2019-05-22"
-
-
-  input_help$symptoms$covariance_nonCOPD <- "Covariance matrix for symptoms random effects in non-COPD patients"
-  input$symptoms$covariance_nonCOPD<- cbind(cough = c(cough = 10.4693, phlegm = 17.10328, wheeze = 9.39833, dyspnea = 1.04549),
-                                            phlegm = c(cough = 17.10328, phlegm = 138.8000, wheeze = 36.8647, dyspnea = 4.67073),
-                                            wheeze = c(cough = 9.39833, phlegm = 36.86470, wheeze = 107.09, dyspnea = 5.78527),
-                                            dyspnea = c(cough = 1.04549, phlegm = 4.67073, wheeze = 5.78527, dyspnea = 5.1828))
-  input_ref$symptoms$covariance_COPD <- "Kate's regression on CanCOLD, provided on 2019-05-22"
-
-
-  ## Outpatient;
-
-    # Primary care visits;
-  input_help$outpatient$ln_rate_gpvisits_COPD_by_sex <- "Rate of GP visits for COPD patients"
-  input$outpatient$ln_rate_gpvisits_COPD_by_sex <- cbind(male=c(intercept=0.4647, age=0.012, smoking=0.0671, fev1=-0.147, cough=0.0116,
-                                                                phlegm=-0.011, wheeze=0.0561, dyspnea=0.0887),
-                                                         female=c(intercept=0.4647-0.0816, age=0.012, smoking=0.0671, fev1=-0.147,
-                                                                  cough=0.0116, phlegm=-0.011, wheeze=0.0561, dyspnea=0.0887))
-  input$outpatient$dispersion_gpvisits_COPD <- 0.431
-  input_ref$outpatient$ln_rate_gpvisits_COPD_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-29"
-
-  input_help$outpatient$ln_rate_gpvisits_nonCOPD_by_sex <- "Rate of GP visits for Non-COPD patients"
-  input$outpatient$ln_rate_gpvisits_nonCOPD_by_sex <-  cbind(male=c(intercept=-0.3589, age=0.017, smoking=0.0657,  cough=0.181, phlegm=-0.0377,
-                                                                    wheeze=0.2344, dyspnea=0.0756),
-                                                             female=c(intercept=-0.3589+0.0099, age=0.017, smoking=0.0657, cough=0.181,
-                                                                      phlegm=-0.0377, wheeze=0.2344, dyspnea=0.0756))
-  input_ref$outpatient$ln_rate_gpvisits_nonCOPD_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-29"
-  input$outpatient$dispersion_gpvisits_nonCOPD <- 0.4093
-
-    # Extras
-  input$outpatient$rate_doctor_visit <- 0.1
-  input$outpatient$p_specialist <- 0.1
-
-
-  ## Diagnosis;
-
-  input_help$diagnosis$logit_p_diagnosis_by_sex <- "Probability of being diagnosed for COPD patients"
-  input$diagnosis$logit_p_diagnosis_by_sex <-  cbind(male=c(intercept=2.6471, age=-0.0325, smoking=-0.082, FEV1=-0.784, gpvisits=0.0005,
-                                                          cough=0.4114, phlegm=0.3318, wheeze=-0.0196, dyspnea=0.744),
-                                                   female=c(intercept=2.6471-0.4742, age=-0.0325, smoking=-0.082, FEV1=-0.784,
-                                                            gpvisits=0.0005, cough=0.4114, phlegm=0.3318, wheeze=-0.0196, dyspnea=0.744))
-  input_ref$diagnosis$logit_p_diagnosis_by_sex <- "Kate's regression on CanCOLD, provided on 2019-05-29"
 
 
   # medication log-hazard regression matrix for initiation of each medication
