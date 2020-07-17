@@ -296,7 +296,7 @@ List Cget_runtime_stats()
 
 
 ////////////////////////////////////////////////////////////////////RANDOM/////////////////////////////////////////////////
-//these stuff are internal so no expoert/import;
+//these stuff are internal so no export/import;
 double *runif_buffer;
 long runif_buffer_pointer;
 
@@ -412,17 +412,6 @@ NumericVector Xrexp(int n, double rate)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 ////////////////////////////////////////////////////////////////////INPUT/////////////////////////////////////////////
 struct input
 {
@@ -479,8 +468,6 @@ struct input
 
 
 } input;
-
-
 
 
 //' Returns inputs
@@ -571,7 +558,6 @@ int Cset_input_var(std::string name, NumericVector value)
   return(ERR_INCORRECT_INPUT_VAR);
 }
 
-
 //' Returns a sample output for a given year and gender.
 //' @param year a number
 //' @param sex a number, 0 for male and 1 for female
@@ -582,11 +568,6 @@ double get_sample_output(int year, int sex)
 {
   return input.agent.p_bgd_by_sex[year][(int)sex];
 }
-
-
-
-
-
 
 
 /////////////////////////////////////////////////////////////////AGENT/////////////////////////////////////
@@ -615,7 +596,6 @@ struct agent
   double pack_years;
 
   int local_time_at_COPD;
-
 
   int cumul_exac[4];    //0:mild, 1:moderate, 2:severe, 3: very severe;
   double cumul_exac_time[4];
@@ -799,9 +779,6 @@ int Ccreate_agents()
 
 
 
-
-
-
 /////////////////////////////////////////////////////////////////////////OUTPUT/////////////////////////////////////////////////
 
 struct output
@@ -900,7 +877,6 @@ struct output_ex
 
 } output_ex;
 #endif
-
 
 
 void reset_output_ex()
@@ -1008,10 +984,6 @@ void update_output_ex(agent *ag)
 
 
 
-
-
-
-
 /////////////////////////////////////////////////////////////////////////LPTs////////////////////////////////////////////////////////////////////////////////
 
 
@@ -1051,12 +1023,6 @@ events<-c(
     event_end=14
 )
   */
-
-
-
-
-
-
 
 
 agent *event_start_process(agent *ag)
@@ -1115,16 +1081,6 @@ agent *event_end_process(agent *ag)
     time-=delta;
   }
 
-
-  //double _age=(*ag).age_at_creation+(*ag).local_time;
-  //while(_age>(*ag).age_at_creation)
-  //{
-  //  int age_cut=floor(_age);
-  //  double delta=min(_age-age_cut,_age-(*ag).age_at_creation);
-  //  if(delta==0) {age_cut-=1; delta=min(_age-age_cut,_age-(*ag).age_at_creation);}
-  //  output_ex.sum_time_by_age_sex[age_cut][(*ag).sex]+=delta;
-  //  _age-=delta;
-  //}
 
   double _age=(*ag).age_at_creation+(*ag).local_time;
   int _low=floor((*ag).age_at_creation);

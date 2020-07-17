@@ -1,5 +1,5 @@
 # The following declarations are already defined in mode.WIP.cpp
-# they are replicated here to make it compatible with epicR as a pakcage. Amin
+# they are replicated here to make it compatible with the pakcage. Amin
 
 record_mode<-c(
   record_mode_none=0,
@@ -9,30 +9,12 @@ record_mode<-c(
 )
 
 
-medication_classes<-c(
-  MED_CLASS_SABA=1,
-  MED_CLASS_LABA=2,
-  MED_CLASS_LAMA=4,
-  MED_CLASS_ICS=8,
-  MED_CLASS_MACRO=16
-)
-
-
 events<-c(
   event_start=0,
   event_fixed=1,
   event_birthday=2,
-  event_smoking_change=3,
-  event_COPD=4,
-  event_exacerbation=5,
-  event_exacerbation_end=6,
-  event_exacerbation_death=7,
-  event_doctor_visit=8,
-  event_medication_change=9,
 
-  event_mi=10,
-  event_stroke=11,
-  event_hf=12,
+  event_COPD=4,
 
   event_bgd=13,
   event_end=14
@@ -58,9 +40,6 @@ errors<-c(
 # End of declarations
 
 
-
-
-
 #' Returns a list of default model input values
 #' @param None
 #' @export
@@ -73,7 +52,6 @@ init_input <- function() {
   input$global_parameters <- list(age0 = 40, time_horizon = 20, discount_cost = 0.03, discount_qaly = 0.03)
   input_help$global_parameters <- list(age0 = "Starting age in the model", time_horizon = "Model time horizon", discount_cost = "Discount value for cost outcomes",
                                        discount_qaly = "Discount value for QALY outcomes")
-
 
 
   input_help$agent$p_female <- "Proportion of females in the population"
@@ -205,18 +183,6 @@ init_input <- function() {
 
     ))
 
-  #  input$manual$explicit_mortality_by_age_sex <- input$manual$explicit_mortality_by_age_sex * 1000000000000
-
-  #input$project_specific$ROC16_biomarker_threshold<-1
-  #input_help$project_specific$ROC16_biomarker_threshold<-"Threshold on the biomarker value that prompts treatment"
-  #input$project_specific$ROC16_biomarker_noise_sd<-0
-  #input_help$project_specific$ROC16_biomarker_noise_sd<-"SD of the multiplicative log-normally distirbuted noise arround the actual exacerbation rate - this noise is added to make the biomarker 'imperfect'"
-  #input$project_specific$ROC16_biomarker_cost<-100
-  #input_help$project_specific$ROC16_biomarker_cost<-"Cost of the biomarker (per patient)"
-  #input$project_specific$ROC16_treatment_cost<-4000
-  #input_help$project_specific$ROC16_treatment_cost<-"Cost of treatment that will reduce the exacerbation rate"
-  #input$project_specific$ROC16_treatment_RR<-0.75
-  #input_help$project_specific$ROC16_treatment_RR<-"Treatment effect (relative risk of future exacerbations after treatment is initiated"
 
   model_input <- list ("values" = input, "help" = input_help, "ref" = input_ref)
   return (model_input)
