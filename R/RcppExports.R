@@ -79,7 +79,7 @@ Ccreate_agents <- function() {
 }
 
 #' Main outputs of the current run.
-#' @return number of agents, cumulative time, number of deaths, number of COPD cases, as well as exacerbation statistics and QALYs.
+#' @return number of agents, cumulative time, number of deaths, number of COPD cases, QALYs.
 #' @export
 Cget_output <- function() {
     .Call(`_asthmaModel_Cget_output`)

@@ -21,7 +21,6 @@ Layout:
 #define OUTPUT_EX_SMOKING 2
 #define OUTPUT_EX_LUNG_FUNCTION 8
 #define OUTPUT_EX_COPD 16
-#define OUTPUT_EX_EXACERBATION 32
 #define OUTPUT_EX_MORTALITY 64
 #define OUTPUT_EX_POPULATION 256
 
@@ -482,18 +481,6 @@ struct input
 
   struct
   {
-    double ln_rate_betas[8];     //intercept sex age fev1 smoking status
-    double logit_severity_betas[9];     //intercept1, intercept2, sex age fev1 smoking_status
-    double ln_rate_intercept_sd;
-    double logit_severity_intercept_sd;       //sd of the intercept (random-effects)
-    double rate_severity_intercept_rho;
-    //double p_moderate_severe[2]; //probability of moderate or severe, compared with mild, exacerbation
-    double exac_end_rate[4]; //rate of exiting exacerbation per type;
-    double logit_p_death_by_sex[7][2]; //rate of mortality per type;
-  } exacerbation;
-
-  struct
-  {
     double bg_cost_by_stage[5];
     double exac_dcost[4];
 
@@ -568,17 +555,6 @@ List Cget_inputs()
       Rcpp::Named("dfev1_sigmas")=AS_VECTOR_DOUBLE(input.lung_function.dfev1_sigmas),
       Rcpp::Named("dfev1_re_rho")=input.lung_function.dfev1_re_rho
     ),
-    Rcpp::Named("exacerbation")=Rcpp::List::create(
-      Rcpp::Named("ln_rate_betas")=AS_VECTOR_DOUBLE(input.exacerbation.ln_rate_betas),
-      Rcpp::Named("logit_severity_betas")=AS_VECTOR_DOUBLE(input.exacerbation.logit_severity_betas),
-      Rcpp::Named("ln_rate_intercept_sd")=input.exacerbation.ln_rate_intercept_sd,
-      Rcpp::Named("logit_severity_intercept_sd")=input.exacerbation.logit_severity_intercept_sd,
-      Rcpp::Named("rate_severity_intercept_rho")=input.exacerbation.rate_severity_intercept_rho,
-      //Rcpp::Named("p_moderate_severe")=AS_VECTOR_DOUBLE(input.exacerbation.p_moderate_severe),
-      Rcpp::Named("exac_end_rate")=AS_VECTOR_DOUBLE(input.exacerbation.exac_end_rate),
-      Rcpp::Named("logit_p_death_by_sex")=AS_MATRIX_DOUBLE(input.exacerbation.logit_p_death_by_sex)
-    ),
-
 
     Rcpp::Named("cost")=Rcpp::List::create(
       Rcpp::Named("bg_cost_by_stage")=AS_VECTOR_DOUBLE(input.cost.bg_cost_by_stage),
@@ -639,15 +615,6 @@ int Cset_input_var(std::string name, NumericVector value)
 
   if(name=="lung_function$dfev1_sigmas") READ_R_VECTOR(value,input.lung_function.dfev1_sigmas);
   if(name=="lung_function$dfev1_re_rho") {input.lung_function.dfev1_re_rho=value[0]; return(0);}
-
-  if(name=="exacerbation$ln_rate_betas") READ_R_VECTOR(value,input.exacerbation.ln_rate_betas);
-  if(name=="exacerbation$logit_severity_betas") READ_R_VECTOR(value,input.exacerbation.logit_severity_betas);
-  if(name=="exacerbation$ln_rate_intercept_sd") {input.exacerbation.ln_rate_intercept_sd=value[0]; return(0);}
-  if(name=="exacerbation$logit_severity_intercept_sd") {input.exacerbation.logit_severity_intercept_sd=value[0]; return(0);}
-  if(name=="exacerbation$rate_severity_intercept_rho") {input.exacerbation.rate_severity_intercept_rho=value[0]; return(0);}
-  //if(name=="exacerbation$p_moderate_severe") READ_R_VECTOR(value,input.exacerbation.p_moderate_severe);
-  if(name=="exacerbation$exac_end_rate") READ_R_VECTOR(value,input.exacerbation.exac_end_rate);
-  if(name=="exacerbation$logit_p_death_by_sex") READ_R_MATRIX(value,input.exacerbation.logit_p_death_by_sex);
 
   if(name=="cost$exac_dcost") READ_R_VECTOR(value,input.cost.exac_dcost);
 
@@ -721,13 +688,8 @@ struct agent
   int local_time_at_COPD;
   double _pred_fev1;
 
-  double ln_exac_rate_intercept;   //backround rate of exacerbation (intercept only);
-  double logit_exac_severity_intercept;   //backround severity of exacerbation (intercept only);
-
   int cumul_exac[4];    //0:mild, 1:moderate, 2:severe, 3: very severe;
   double cumul_exac_time[4];
-  double exac_LPT;  //the last time cumul exacerbation time was processed;
-  int exac_status;    //current exacerbation status 0: no exacerbation, in 1: mild, 2:moderate, 3:severe exacerbation
 
   double cumul_cost;
   double cumul_qaly;
@@ -793,18 +755,7 @@ List get_agent(agent *ag)
 
     Rcpp::Named("fev1")=(*ag).fev1,
     Rcpp::Named("fev1_slope")=(*ag).fev1_slope,
-    Rcpp::Named("fev1_slope_t")=(*ag).fev1_slope_t,
-
-    Rcpp::Named("exac_status")=(*ag).exac_status,
-    Rcpp::Named("ln_exac_rate_intercept")=(*ag).ln_exac_rate_intercept,
-    Rcpp::Named("logit_exac_severity_intercept")=(*ag).logit_exac_severity_intercept,
-
-    Rcpp::Named("cumul_exac0")=(*ag).cumul_exac[0],
-                                               Rcpp::Named("cumul_exac1")=(*ag).cumul_exac[1],
-                                                                                          Rcpp::Named("cumul_exac2")=(*ag).cumul_exac[2],
-                                                                                                                                     Rcpp::Named("cumul_exac3")=(*ag).cumul_exac[3]
-
-
+    Rcpp::Named("fev1_slope_t")=(*ag).fev1_slope_t
   );
   // out["fev1_decline_intercept"] = (*ag).fev1_decline_intercept;
   out["weight_baseline"] = (*ag).weight_baseline; //added here because the function "create" above can take a limited number of arguments
@@ -916,22 +867,6 @@ if(id<settings.n_base_agents) //the first n_base_agent cases are prevalent cases
   +input.agent.weight_0_betas[4]*(*ag).age_at_creation*(*ag).sex
   +input.agent.weight_0_betas[5]*(*ag).height
   +input.agent.weight_0_betas[6]*calendar_time;
-
-  //exacerbation;
-  rbvnorm(input.exacerbation.rate_severity_intercept_rho,_bvn);
-  (*ag).ln_exac_rate_intercept=_bvn[0]*input.exacerbation.ln_rate_intercept_sd;
-  (*ag).logit_exac_severity_intercept=_bvn[1]*input.exacerbation.logit_severity_intercept_sd;
-
-  (*ag).cumul_exac[0]=0;
-  (*ag).cumul_exac[1]=0;
-  (*ag).cumul_exac[2]=0;
-  (*ag).cumul_exac[3]=0;
-  (*ag).cumul_exac_time[0]=0;
-  (*ag).cumul_exac_time[1]=0;
-  (*ag).cumul_exac_time[2]=0;
-  (*ag).cumul_exac_time[3]=0;
-  (*ag).exac_status=0;
-  (*ag).exac_LPT=0;
 
 
   //COPD;
@@ -1093,7 +1028,7 @@ void reset_output()
 }
 
 //' Main outputs of the current run.
-//' @return number of agents, cumulative time, number of deaths, number of COPD cases, as well as exacerbation statistics and QALYs.
+//' @return number of agents, cumulative time, number of deaths, number of COPD cases, QALYs.
 //' @export
 // [[Rcpp::export]]
 List Cget_output()
@@ -1103,8 +1038,6 @@ List Cget_output()
     Rcpp::Named("cumul_time")=output.cumul_time,
     Rcpp::Named("n_deaths")=output.n_deaths,
     Rcpp::Named("n_COPD")=output.n_COPD,
-    Rcpp::Named("total_exac")=AS_VECTOR_INT(output.total_exac),
-    Rcpp::Named("total_exac_time")=AS_VECTOR_DOUBLE(output.total_exac_time),
     Rcpp::Named("total_pack_years")=output.total_pack_years,
     Rcpp::Named("total_cost")=output.total_cost,
     Rcpp::Named("total_qaly")=output.total_qaly
@@ -1153,18 +1086,6 @@ struct output_ex
   int n_COPD_by_age_sex[111][2];
   int cumul_time_by_ctime_GOLD[100][5];
 
-#endif
-
-#if (OUTPUT_EX & OUTPUT_EX_EXACERBATION) > 0
-  int n_exac_by_ctime_age[100][111];
-  int n_severep_exac_by_ctime_age[100][111];
-  int n_exac_death_by_ctime_age [100][111];
-  int n_exac_death_by_ctime_severity [100][4];
-  int n_exac_death_by_age_sex [111][2];
-  int n_exac_by_ctime_severity[100][4];
-  int n_exac_by_gold_severity[4][4];
-  int n_exac_by_ctime_severity_female[100][4];
-  int n_exac_by_ctime_GOLD[100][4];
 #endif
 
 
@@ -1225,22 +1146,10 @@ List Cget_output_ex()
     out["n_inc_COPD_by_ctime_age"]=AS_MATRIX_INT_SIZE(output_ex.n_inc_COPD_by_ctime_age,input.global_parameters.time_horizon),
     out["n_COPD_by_ctime_severity"]=AS_MATRIX_INT_SIZE(output_ex.n_COPD_by_ctime_severity,input.global_parameters.time_horizon),
     out["n_COPD_by_age_sex"]=AS_MATRIX_INT(output_ex.n_COPD_by_age_sex),
-    out("cumul_time_by_ctime_GOLD")=AS_MATRIX_INT_SIZE(output_ex.cumul_time_by_ctime_GOLD,input.global_parameters.time_horizon),
+    out("cumul_time_by_ctime_GOLD")=AS_MATRIX_INT_SIZE(output_ex.cumul_time_by_ctime_GOLD,input.global_parameters.time_horizon);
 
 #endif
 
-
-#if (OUTPUT_EX & OUTPUT_EX_EXACERBATION)>0
-    out["n_exac_by_ctime_age"]=AS_MATRIX_INT_SIZE(output_ex.n_exac_by_ctime_age,input.global_parameters.time_horizon);
-    out["n_severep_exac_by_ctime_age"]=AS_MATRIX_INT_SIZE(output_ex. n_severep_exac_by_ctime_age,input.global_parameters.time_horizon);
-    out["n_exac_death_by_ctime_age"]=AS_MATRIX_INT_SIZE(output_ex.n_exac_death_by_ctime_age,input.global_parameters.time_horizon);
-    out["n_exac_death_by_ctime_severity"]=AS_MATRIX_INT_SIZE(output_ex.n_exac_death_by_ctime_severity,input.global_parameters.time_horizon);
-    out["n_exac_death_by_age_sex"]=AS_MATRIX_INT(output_ex.n_exac_death_by_age_sex);
-    out["n_exac_by_ctime_severity"]=AS_MATRIX_INT_SIZE(output_ex.n_exac_by_ctime_severity,input.global_parameters.time_horizon);
-    out["n_exac_by_gold_severity"]=AS_MATRIX_INT_SIZE(output_ex.n_exac_by_gold_severity,4);
-    out["n_exac_by_ctime_severity_female"]=AS_MATRIX_INT_SIZE(output_ex.n_exac_by_ctime_severity_female,input.global_parameters.time_horizon);
-    out["n_exac_by_ctime_GOLD"]=AS_MATRIX_INT_SIZE(output_ex.n_exac_by_ctime_GOLD,input.global_parameters.time_horizon);
-#endif
 
     return(out);
 }
@@ -1367,14 +1276,6 @@ void smoking_LPT(agent *ag)
 }
 
 
-void exacerbation_LPT(agent *ag)
-{
-  if((*ag).exac_status>0)
-    (*ag).cumul_exac_time[(*ag).exac_status-1]+=(*ag).local_time-(*ag).exac_LPT;
-  (*ag).exac_LPT=(*ag).local_time;
-}
-
-
 void payoffs_LPT(agent *ag)
 {
   (*ag).cumul_cost+=input.cost.bg_cost_by_stage[(*ag).gold]*((*ag).local_time-(*ag).payoffs_LPT)/pow(1+input.global_parameters.discount_cost,(*ag).local_time+calendar_time);
@@ -1401,9 +1302,6 @@ enum events
   event_birthday=2,
   event_smoking_change=3,
   event_COPD=4,
-  event_exacerbation=5,
-  event_exacerbation_end=6,
-  event_exacerbation_death=7,
 
   event_hf=12,
   event_bgd=13,
@@ -1416,9 +1314,6 @@ events<-c(
     event_birthday=2,
     event_smoking_change=3,
     event_COPD=4,
-    event_exacerbation=5,
-    event_exacerbation_end=6,
-    event_exacerbation_death=7,
 
     event_bgd=13,
     event_end=14
@@ -1441,20 +1336,8 @@ agent *event_start_process(agent *ag)
 }
 
 
-
-
 agent *event_end_process(agent *ag)
 {
-  if((*ag).exac_status>0)
-  {
-    //NOTE: exacerbation timing is an LPT process and is treated separately.
-    (*ag).cumul_cost+=input.cost.exac_dcost[(*ag).exac_status-1]/pow(1+input.global_parameters.discount_cost,(*ag).local_time+calendar_time);
-    (*ag).cumul_qaly+=input.utility.exac_dutil[(*ag).exac_status-1][(*ag).gold-1]/pow(1+input.global_parameters.discount_qaly,(*ag).local_time+calendar_time);
-
-    (*ag).annual_cost+=input.cost.exac_dcost[(*ag).exac_status-1]/pow(1+input.global_parameters.discount_cost,(*ag).local_time+calendar_time);
-    (*ag).annual_qaly+=input.utility.exac_dutil[(*ag).exac_status-1][(*ag).gold-1]/pow(1+input.global_parameters.discount_qaly,(*ag).local_time+calendar_time);
-
-  }
 
   ++output.n_agents;
   output.n_COPD+=((*ag).gold>0)*1;
@@ -1462,7 +1345,7 @@ agent *event_end_process(agent *ag)
   output.n_deaths+=!(*ag).alive;
 
   lung_function_LPT(ag);
-  exacerbation_LPT(ag);
+
   payoffs_LPT(ag);
 
   output.total_pack_years+=(*ag).pack_years;
@@ -1536,18 +1419,8 @@ agent *event_end_process(agent *ag)
 
 
 
-
-
-
-
-
-
 agent *event_stack;
 int event_stack_pointer;
-
-
-
-
 
 
 int push_event(agent *ag)
@@ -1822,183 +1695,6 @@ void event_COPD_process(agent *ag)
 }
 
 
-
-
-
-
-
-//////////////////////////////////////////////////////////////////EVENT_EXACERBATIN////////////////////////////////////;
-double event_exacerbation_tte(agent *ag)
-{
-  if((*ag).gold==0 || (*ag).exac_status>0) return(HUGE_VAL);
-
-  double rate=exp((*ag).ln_exac_rate_intercept
-                    +input.exacerbation.ln_rate_betas[0]
-                    +input.exacerbation.ln_rate_betas[1]*(*ag).sex
-                    +input.exacerbation.ln_rate_betas[2]*((*ag).age_at_creation+(*ag).local_time)
-                    +input.exacerbation.ln_rate_betas[3]*(*ag).fev1
-                    +input.exacerbation.ln_rate_betas[4]*(*ag).smoking_status
-                    +input.exacerbation.ln_rate_betas[5]*((*ag).gold==2)
-                    +input.exacerbation.ln_rate_betas[6]*((*ag).gold==3)
-                    +input.exacerbation.ln_rate_betas[7]*((*ag).gold==4)
-  );
-
-
-  double tte;
-
-  if(rate==0) tte=HUGE_VAL; else tte=rand_exp()/rate;
-
-  return(tte);
-}
-
-
-
-
-
-void event_exacerbation_process(agent *ag)
-{
-  double temp=(*ag).logit_exac_severity_intercept
-  +input.exacerbation.logit_severity_betas[3]*(*ag).sex
-  +input.exacerbation.logit_severity_betas[4]*((*ag).age_at_creation+(*ag).local_time)
-  +input.exacerbation.logit_severity_betas[5]*(*ag).fev1
-  +input.exacerbation.logit_severity_betas[6]*(*ag).smoking_status
-  +input.exacerbation.logit_severity_betas[7]*(*ag).pack_years
-  +input.exacerbation.logit_severity_betas[8]*(*ag).weight/((*ag).height*(*ag).height);
-
-  double l1,l2,l3;
-  l1=temp+input.exacerbation.logit_severity_betas[0];
-  l2=temp+input.exacerbation.logit_severity_betas[1];
-  l3=temp+input.exacerbation.logit_severity_betas[2];
-  double p1,p2,p3;
-
-  p1=1/(1+exp(-l1));
-  p2=1/(1+exp(-l2))-1/(1+exp(-l1));
-  p3=1/(1+exp(-l3))-1/(1+exp(-l2));
-  // no need for p4, as its value is determined as 1-(p1+p2+p3)
-
-  double r=rand_unif();
-
-  if(r<p1) (*ag).exac_status=1;
-  else if(r<(p1+p2)) (*ag).exac_status=2;
-  else if(r<(p1+p2+p3)) (*ag).exac_status=3;
-  else (*ag).exac_status=4;
-
-  (*ag).cumul_exac[(*ag).exac_status-1]+=1;
-  (*ag).exac_LPT=(*ag).local_time;
-
-
-#if (OUTPUT_EX & OUTPUT_EX_EXACERBATION)>0
-  output_ex.n_exac_by_ctime_age[(int)floor((*ag).time_at_creation+(*ag).local_time)][(int)(floor((*ag).age_at_creation+(*ag).local_time))]+=1;
-  output_ex.n_exac_by_ctime_severity[(int)floor((*ag).time_at_creation+(*ag).local_time)][(*ag).exac_status-1]+=1;
-  output_ex.n_exac_by_gold_severity[(*ag).gold-1][(*ag).exac_status-1]+=1;
-  output_ex.n_exac_by_ctime_severity_female[(int)floor((*ag).time_at_creation+(*ag).local_time)][(*ag).exac_status-1]+=(*ag).sex;
-  output_ex.n_exac_by_ctime_GOLD[(int)floor((*ag).time_at_creation+(*ag).local_time)][(*ag).gold-1]+=1;
-  if ((*ag).exac_status > 2) output_ex.n_severep_exac_by_ctime_age[(int)floor((*ag).time_at_creation+(*ag).local_time)][(int)(floor((*ag).age_at_creation+(*ag).local_time))]+=1;
-
-#endif
-}
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////EVENT_EXACERBATIN_END////////////////////////////////////;
-double event_exacerbation_end_tte(agent *ag)
-{
-  if((*ag).exac_status==0) return(HUGE_VAL);
-
-  double rate=input.exacerbation.exac_end_rate[(*ag).exac_status-1];
-
-  double tte;
-
-  if(rate==0) tte=HUGE_VAL; else tte=rand_exp()/rate;
-
-  return(tte);
-}
-
-
-
-
-
-void event_exacerbation_end_process(agent *ag)
-{
-  (*ag).cumul_cost+=input.cost.exac_dcost[(*ag).exac_status-1]/(1+pow(input.global_parameters.discount_cost,(*ag).time_at_creation+(*ag).local_time));
-  (*ag).cumul_qaly+=input.utility.exac_dutil[(*ag).exac_status-1][(*ag).gold-1]/(1+pow(input.global_parameters.discount_qaly,(*ag).time_at_creation+(*ag).local_time));
-
-  (*ag).annual_cost+=input.cost.exac_dcost[(*ag).exac_status-1]/(1+pow(input.global_parameters.discount_cost,(*ag).time_at_creation+(*ag).local_time));
-  (*ag).annual_qaly+=input.utility.exac_dutil[(*ag).exac_status-1][(*ag).gold-1]/(1+pow(input.global_parameters.discount_qaly,(*ag).time_at_creation+(*ag).local_time));
-
-  (*ag).exac_status=0;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////EVENT_EXACERBATIN_DEATH////////////////////////////////////;
-double event_exacerbation_death_tte(agent *ag)
-{
-  if((*ag).exac_status == 0) return(HUGE_VAL);
-
-  double tte=HUGE_VAL;
-
-  //  double p=input.exacerbation.logit_logit_p_death_by_sex[(*ag).exac_status-1];
-
-
-  double p = 0;
-  if ((*ag).exac_status > 2) {
-    p = exp(input.exacerbation.logit_p_death_by_sex[0][(*ag).sex]
-              + input.exacerbation.logit_p_death_by_sex[1][(*ag).sex]*((*ag).local_time+(*ag).age_at_creation)
-              + input.exacerbation.logit_p_death_by_sex[2][(*ag).sex]*((*ag).exac_status==1)
-              + input.exacerbation.logit_p_death_by_sex[3][(*ag).sex]*((*ag).exac_status==2)
-              + input.exacerbation.logit_p_death_by_sex[4][(*ag).sex]*((*ag).exac_status==3)
-              + input.exacerbation.logit_p_death_by_sex[5][(*ag).sex]*((*ag).exac_status==4)
-              + input.exacerbation.logit_p_death_by_sex[6][(*ag).sex]*0 //Placeholder for incorporating history of smoking
-    );
-  }
-
-  p = p / (1 + p);
-
-  if (rand_unif() < p)
-  {
-    tte=1/input.exacerbation.exac_end_rate[(*ag).exac_status-1];
-    //All death occur at the end of expected time of exacerbation (for now);
-    (*ag).local_time += tte;
-    return(0);
-  }
-  else
-  {
-    return(HUGE_VAL);
-  }
-
-}
-
-
-
-
-
-void event_exacerbation_death_process(agent *ag)
-{
-  (*ag).alive=false;
-#if (OUTPUT_EX & OUTPUT_EX_EXACERBATION)>0
-  output_ex.n_exac_death_by_ctime_age[(int)floor((*ag).time_at_creation+(*ag).local_time)][(int)(floor((*ag).age_at_creation+(*ag).local_time))]+=1;
-  output_ex.n_exac_death_by_ctime_severity[(int)floor((*ag).time_at_creation+(*ag).local_time)][(*ag).exac_status-1]+=1;
-  output_ex.n_exac_death_by_age_sex[(int)(floor((*ag).age_at_creation+(*ag).local_time))][(*ag).sex]+=1;
-
-#endif
-  //Rprintf("Death by chocolate!\n");
-}
-
-
 ////////////////////////////////////////////////////////////////////EVENT_bgd/////////////////////////////////////;
 double event_bgd_tte(agent *ag)
 {
@@ -2055,7 +1751,6 @@ agent *event_fixed_process(agent *ag)
 
   lung_function_LPT(ag);
   smoking_LPT(ag);
-  exacerbation_LPT(ag);
   payoffs_LPT(ag);
 
 #ifdef OUTPUT_EX
@@ -2315,27 +2010,6 @@ int Cmodel(int max_n_agents)
         winner=event_COPD;
       }
 
-      temp=event_exacerbation_tte(ag);
-      if(temp<tte)
-      {
-        tte=temp;
-        winner=event_exacerbation;
-      }
-
-      temp=event_exacerbation_end_tte(ag);
-      if(temp<tte)
-      {
-        tte=temp;
-        winner=event_exacerbation_end;
-      }
-
-      temp=event_exacerbation_death_tte(ag);
-      if(temp<tte)
-      {
-        tte=temp;
-        winner=event_exacerbation_death;
-      }
-
     
       temp=event_bgd_tte(ag);
       if(temp<tte)
@@ -2354,7 +2028,6 @@ int Cmodel(int max_n_agents)
         {
           lung_function_LPT(ag);
           smoking_LPT(ag);
-          exacerbation_LPT(ag);
           payoffs_LPT(ag);
         }
 
@@ -2372,18 +2045,7 @@ int Cmodel(int max_n_agents)
           event_COPD_process(ag);
           (*ag).event=event_COPD;
           break;
-        case event_exacerbation:
-          event_exacerbation_process(ag);
-          (*ag).event=event_exacerbation;
-          break;
-        case event_exacerbation_end:
-          event_exacerbation_end_process(ag);
-          (*ag).event=event_exacerbation_end;
-          break;
-        case event_exacerbation_death:
-          event_exacerbation_death_process(ag);
-          (*ag).event=event_exacerbation_death;
-          break;
+
          
         case event_bgd:
           event_bgd_process(ag);

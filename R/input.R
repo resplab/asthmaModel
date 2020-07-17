@@ -238,45 +238,6 @@ init_input <- function() {
   input_ref$lung_function$dfev1_re_rho <- "G Matrix Zafari CMAJ 2016 - Modified"
 
 
-  ## Exacerbation;
-
-  input_help$exacerbation$ln_rate_betas = "Regression coefficients for the random-effects log-hazard model of exacerbation (of any severity)"
-  input$exacerbation$ln_rate_betas = t(as.matrix(c(intercept = -2.10, female = 0, age = 0.04082 * 0.1, fev1 = -0, smoking_status = 0,
-                                                   gold2 = 1.1, gold3 = 1.9, gold4 = 2.4)))
-  input_ref$exacerbation$ln_rate_betas = "Rates from DOI: 10.2147/COPD.S13826, adjusted to account for diganosis bias. Adjusted on 2018-10-02 to match manuscript"
-
-  input_help$exacerbation$ln_rate_intercept_sd = "SD of the random intercept for log-hazard of exacerbation"
-  input$exacerbation$ln_rate_intercept_sd = sqrt(0.55)
-  input_ref$exacerbation$ln_rate_intercept_sd = ""
-
-
-  input_help$exacerbation$logit_severity_betas = "Regression coefficients for the proportional odds model of exacerbation severity"
-  input$exacerbation$logit_severity_betas = t(as.matrix(c(intercept1 = 1.091, intercept2 = 1.902, intercept3 = 5.208, female = -0.764,
-                                                          age = -0.007, fev1 = -0.003, smoking_status = 0.348, pack_years = -0.001 , BMI = 0.018)))
-  input_ref$exacerbation$logit_severity_betas = "Shahzad's regression on MACRO with adjusted intercepts to match severity levels reported by Hoogendoorn et al. Last updated on manuscript submission"
-
-
-  input_help$exacerbation$logit_severity_intercept_sd = "SD of the random intercept for proportional odds model of exacerbation severity"
-  input$exacerbation$logit_severity_intercept_sd = sqrt(2.0736)
-  input_ref$exacerbation$logit_severity_intercept_sd = ""
-
-
-  input_help$exacerbation$rate_severity_intercept_rho = "Correlation coefficient between the random effect terms of rate and severity"
-  input$exacerbation$rate_severity_intercept_rho = -0
-  input_ref$exacerbation$rate_severity_intercept_rho = ""
-
-
-  input_help$exacerbation$exac_end_rate <- "Rate of ending of an exacerbation (inversely realted to exacerbation duration) according to severity level"
-  input$exacerbation$exac_end_rate <- t(as.matrix(c(mild = 365/5, moderate = 365/5, severe = 365/5, verysevere = 365/5)))
-  input_ref$exacerbation$exac_end_rate <- ""
-
-  input_help$exacerbation$logit_p_death_by_sex <- "Probability of death due to exacerbation according to its severity level"
-  #  input$exacerbation$p_death <- t(as.matrix(c(mild = 0, moderate = 0, severe = 0.1, verysevere = 0.1)))
-  input$exacerbation$logit_p_death_by_sex <- cbind(male = c(intercept = -13, age = log(1.05),  mild = 0, moderate = 0, severe = 7.4, very_severe = 8, n_hist_severe_exac = 0),
-                                                   female = c(intercept = -13, age = log(1.05),  mild = 0, moderate = 0, severe = 7.4, very_severe = 8, n_hist_severe_exac = 0))
-  input_ref$exacerbation$logit_p_death_by_sex <- ""
-
-
   ##cost and utility
   input$cost$bg_cost_by_stage=t(as.matrix(c(N=0, I=615, II=1831, III=2619, IV=3021)))
   input_help$cost$bg_cost_by_stage="Annual direct costs for non-COPD, and COPD by GOLD grades"
