@@ -481,20 +481,6 @@ struct input
 
   struct
   {
-    double logit_p_current_smoker_0_betas[7]; //intercept, sex, age, age2, age*sex sex*age^2 year;
-    double logit_p_never_smoker_con_not_current_0_betas[7]; //intercept, sex, age, age2,age*sex sex*age^2 year;
-    double pack_years_0_betas[5]; //intercept, smoker, sex, age, year
-    double pack_years_0_sd;
-    double ln_h_inc_betas[5]; //intercept, sex, age, age*2 calendar time,
-    double minimum_smoking_prevalence;
-    double mortality_factor_current[5]; // ratio of overall minus COPD mortality rate in current smokers vs non-smokers
-    double mortality_factor_former[5]; // ratio of overall minus COPD mortality rate in former smokers vs non-smokers
-    double ln_h_ces_betas[5]; //intercept, sex, age, age*2 calendar time,
-  } smoking;
-
-
-  struct
-  {
     double ln_h_COPD_betas_by_sex[7][2]; //INCIDENCE: intercept, age, age2, pack_years, current_smoking, year, asthma;
     double logit_p_COPD_betas_by_sex[7][2]; //PREVALENCE: intercept, age, age2, pack_years, current_smoking, year, asthma;
   } COPD;
@@ -648,21 +634,6 @@ List Cget_inputs()
       Rcpp::Named("l_inc_betas")=AS_VECTOR_DOUBLE(input.agent.l_inc_betas),
       Rcpp::Named("ln_h_bgd_betas")=AS_VECTOR_DOUBLE(input.agent.ln_h_bgd_betas)
     ),
-    Rcpp::Named("smoking")=Rcpp::List::create(
-      //Rcpp::Named("inc_by_age_sex")=AS_MATRIX_DOUBLE(input.smoking.inc_by_age_sex),
-      //Rcpp::Named("ces_by_age_sex")=AS_MATRIX_DOUBLE(input.smoking.ces_by_age_sex),
-      //Rcpp::Named("rel_by_age_sex")=AS_MATRIX_DOUBLE(input.smoking.rel_by_age_sex),
-
-      Rcpp::Named("logit_p_current_smoker_0_betas")=AS_VECTOR_DOUBLE(input.smoking.logit_p_current_smoker_0_betas),
-      Rcpp::Named("logit_p_never_smoker_con_not_current_0_betas")=AS_VECTOR_DOUBLE(input.smoking.logit_p_never_smoker_con_not_current_0_betas),
-      Rcpp::Named("pack_years_0_betas")=AS_VECTOR_DOUBLE(input.smoking.pack_years_0_betas),
-      Rcpp::Named("pack_years_0_sd")=input.smoking.pack_years_0_sd,
-      Rcpp::Named("ln_h_inc_betas")=AS_VECTOR_DOUBLE(input.smoking.ln_h_inc_betas),
-      Rcpp::Named("minimum_smoking_prevalence")=input.smoking.minimum_smoking_prevalence,
-      Rcpp::Named("mortality_factor_current")=AS_VECTOR_DOUBLE(input.smoking.mortality_factor_current),
-      Rcpp::Named("mortality_factor_former")=AS_VECTOR_DOUBLE(input.smoking.mortality_factor_former),
-      Rcpp::Named("ln_h_ces_betas")=AS_VECTOR_DOUBLE(input.smoking.ln_h_ces_betas)
-    ),
     Rcpp::Named("COPD")=Rcpp::List::create(
       Rcpp::Named("ln_h_COPD_betas_by_sex")=AS_MATRIX_DOUBLE(input.COPD.ln_h_COPD_betas_by_sex),
       Rcpp::Named("logit_p_COPD_betas_by_sex")=AS_MATRIX_DOUBLE(input.COPD.logit_p_COPD_betas_by_sex)
@@ -781,20 +752,6 @@ int Cset_input_var(std::string name, NumericVector value)
   if(name=="agent$p_bgd_by_sex") READ_R_MATRIX(value,input.agent.p_bgd_by_sex);
   if(name=="agent$l_inc_betas") READ_R_VECTOR(value,input.agent.l_inc_betas);
   if(name=="agent$ln_h_bgd_betas") READ_R_VECTOR(value,input.agent.ln_h_bgd_betas);
-
-  //if(name=="smoking$inc_by_age_sex") READ_R_MATRIX(value,input.smoking.inc_by_age_sex);
-  //if(name=="smoking$ces_by_age_sex") READ_R_MATRIX(value,input.smoking.ces_by_age_sex);
-  //if(name=="smoking$rel_by_age_sex") READ_R_MATRIX(value,input.smoking.rel_by_age_sex);
-
-  if(name=="smoking$logit_p_current_smoker_0_betas") READ_R_VECTOR(value,input.smoking.logit_p_current_smoker_0_betas);
-  if(name=="smoking$logit_p_never_smoker_con_not_current_0_betas") READ_R_VECTOR(value,input.smoking.logit_p_never_smoker_con_not_current_0_betas);
-  if(name=="smoking$pack_years_0_betas") READ_R_VECTOR(value,input.smoking.pack_years_0_betas);
-  if(name=="smoking$pack_years_0_sd") {input.smoking.pack_years_0_sd=value[0]; return(0);}
-  if(name=="smoking$ln_h_inc_betas") READ_R_VECTOR(value,input.smoking.ln_h_inc_betas);
-  if(name=="smoking$minimum_smoking_prevalence") {input.smoking.minimum_smoking_prevalence=value[0]; return(0);}
-  if(name=="smoking$mortality_factor_current") READ_R_VECTOR(value,input.smoking.mortality_factor_current);
-  if(name=="smoking$mortality_factor_former") READ_R_VECTOR(value,input.smoking.mortality_factor_former);
-  if(name=="smoking$ln_h_ces_betas") READ_R_VECTOR(value,input.smoking.ln_h_ces_betas);
 
   if(name=="COPD$ln_h_COPD_betas_by_sex") READ_R_MATRIX(value,input.COPD.ln_h_COPD_betas_by_sex);
   if(name=="COPD$logit_p_COPD_betas_by_sex") READ_R_MATRIX(value,input.COPD.logit_p_COPD_betas_by_sex);
@@ -1364,63 +1321,6 @@ if(id<settings.n_base_agents) //the first n_base_agent cases are prevalent cases
   +input.agent.weight_0_betas[4]*(*ag).age_at_creation*(*ag).sex
   +input.agent.weight_0_betas[5]*(*ag).height
   +input.agent.weight_0_betas[6]*calendar_time;
-
-  //smoking
-  bool ever_smoker=false;
-
-  double odds1=exp(input.smoking.logit_p_current_smoker_0_betas[0]
-                     +input.smoking.logit_p_current_smoker_0_betas[1]*(*ag).sex
-                     +input.smoking.logit_p_current_smoker_0_betas[2]*(*ag).age_at_creation
-                     +input.smoking.logit_p_current_smoker_0_betas[3]*pow((*ag).age_at_creation,2)
-                     +input.smoking.logit_p_current_smoker_0_betas[4]*(*ag).age_at_creation*(*ag).sex
-                     +input.smoking.logit_p_current_smoker_0_betas[5]*pow((*ag).age_at_creation,2)*(*ag).sex
-                     +input.smoking.logit_p_current_smoker_0_betas[6]*calendar_time
-  );
-
-  double temp = max(input.smoking.minimum_smoking_prevalence,(odds1/(1+odds1)));
-
-  if(rand_unif() < temp) //adding a minimum baseline smoking prevalence. ever smoker
-  {
-    (*ag).smoking_status = 1;
-    ever_smoker = true;
-  }
-  else
-  {
-    (*ag).smoking_status=0;
-    double odds2=exp(input.smoking.logit_p_never_smoker_con_not_current_0_betas[0]
-                       +input.smoking.logit_p_never_smoker_con_not_current_0_betas[1]*(*ag).sex
-                       +input.smoking.logit_p_never_smoker_con_not_current_0_betas[2]*(*ag).age_at_creation
-                       +input.smoking.logit_p_never_smoker_con_not_current_0_betas[3]*pow((*ag).age_at_creation,2)
-                       +input.smoking.logit_p_never_smoker_con_not_current_0_betas[4]*(*ag).age_at_creation*(*ag).sex
-                       +input.smoking.logit_p_never_smoker_con_not_current_0_betas[5]*pow((*ag).age_at_creation,2)*(*ag).sex
-                       +input.smoking.logit_p_never_smoker_con_not_current_0_betas[6]*calendar_time
-    );
-
-    if(rand_unif()< (odds2/(1+odds2))) {
-      (*ag).pack_years=0;
-      ever_smoker = false;
-    }
-    else{
-      ever_smoker = true;
-    }
-  }
-  if(ever_smoker)
-  {
-    double temp=input.smoking.pack_years_0_betas[0]
-    +input.smoking.pack_years_0_betas[1]*(*ag).sex
-    +input.smoking.pack_years_0_betas[2]*((*ag).age_at_creation+(*ag).local_time)
-    +input.smoking.pack_years_0_betas[3]*((*ag).time_at_creation+(*ag).local_time)
-    +input.smoking.pack_years_0_betas[4]*(*ag).smoking_status;
-
-    (*ag).pack_years=temp+rand_norm()*input.smoking.pack_years_0_sd;
-    if ((*ag).pack_years < 0 ) {
-      (*ag).pack_years = 0; //making sure we don't get negative pack_years
-    }
-  }
-
-
-  (*ag).smoking_status_LPT=0;
-
 
   //exacerbation;
   rbvnorm(input.exacerbation.rate_severity_intercept_rho,_bvn);
@@ -2390,63 +2290,6 @@ NumericMatrix Cget_all_events_matrix()
 
 
 
-
-//////////////////////////////////////////////////////////////////EVENT_SMOKING////////////////////////////////////;
-double event_smoking_change_tte(agent *ag)
-{
-  double rate;
-
-
-  if((*ag).smoking_status==0)
-  {
-    rate=exp(input.smoking.ln_h_inc_betas[0]
-               +input.smoking.ln_h_inc_betas[1]*(*ag).sex
-               +input.smoking.ln_h_inc_betas[2]*((*ag).age_at_creation+(*ag).local_time)
-               +input.smoking.ln_h_inc_betas[3]*pow((*ag).age_at_creation+(*ag).local_time,2)
-               +input.smoking.ln_h_inc_betas[4]*(calendar_time+(*ag).local_time)); //TODO:should be cal+loc time???
-  }
-  else
-  {
-    rate=exp(input.smoking.ln_h_ces_betas[0]
-               +input.smoking.ln_h_ces_betas[1]*(*ag).sex
-               +input.smoking.ln_h_ces_betas[2]*((*ag).age_at_creation+(*ag).local_time)
-               +input.smoking.ln_h_ces_betas[3]*pow((*ag).age_at_creation+(*ag).local_time,2)
-               +input.smoking.ln_h_ces_betas[4]*(calendar_time+(*ag).local_time));
-  }
-
-
-  double tte=rand_exp()/rate;
-
-  return(tte);
-}
-
-
-
-
-
-void event_smoking_change_process(agent *ag)
-{
-  smoking_LPT(ag);
- // if ((*ag).gold==0) { //for debug porpuses. No smoking change when COPD present
-    if((*ag).smoking_status==0) {
-      (*ag).smoking_status=1;
-    }
-
-    else {
-      (*ag).smoking_status=0;
-    }
-
-//   }
-}
-
-
-
-
-
-
-
-
-
 //////////////////////////////////////////////////////////////////EVENT_COPD////////////////////////////////////;
 double event_COPD_tte(agent *ag)
 {
@@ -2906,25 +2749,6 @@ double event_bgd_tte(agent *ag)
     double odds=p/(1-p)*_or;
     p=odds/(1+odds);
 
-    //adjusting background mortality for current smokers
-    if ((*ag).smoking_status > 1e-5) {
-      p *= input.smoking.mortality_factor_current[0] * ((age >= 40) && (age < 50)) +
-        input.smoking.mortality_factor_current[1] * ((age >= 50) && (age < 60)) +
-        input.smoking.mortality_factor_current[2] * ((age >= 60) && (age < 70)) +
-        input.smoking.mortality_factor_current[3] * ((age >= 70) && (age < 80)) +
-        input.smoking.mortality_factor_current[4] * (age >= 80);
-
-      if (p > 1) {p = 1;}
-
-      //adjusting background mortality for former smokers
-    } else if ((*ag).pack_years > 1e-5) {
-      p *= input.smoking.mortality_factor_former[0] * ((age >= 40) && (age < 50)) +
-        input.smoking.mortality_factor_former[1] * ((age >= 50) && (age < 60)) +
-        input.smoking.mortality_factor_former[2] * ((age >= 60) && (age < 70)) +
-        input.smoking.mortality_factor_former[3] * ((age >= 70) && (age < 80)) +
-        input.smoking.mortality_factor_former[4] * (age >= 80);
-      if (p > 1) {p = 1;}
-    }
     if(p==1)
     {
       ttd=0;
@@ -3299,13 +3123,6 @@ int Cmodel(int max_n_agents)
         winner=event_birthday;
       }
 
-      temp=event_smoking_change_tte(ag);
-   //   if(temp<tte && (*ag).gold==0)  //for debug porpuses, no smoking change when COPD is present
-      if(temp<tte)
-      {
-        tte=temp;
-        winner=event_smoking_change;
-      }
 
       temp=event_COPD_tte(ag);
       if(temp<tte)
@@ -3401,10 +3218,6 @@ int Cmodel(int max_n_agents)
         case event_birthday:
           event_birthday_process(ag);
           (*ag).event=event_birthday;
-          break;
-        case event_smoking_change:
-          event_smoking_change_process(ag);
-          (*ag).event=event_smoking_change;
           break;
         case event_COPD:
           event_COPD_process(ag);

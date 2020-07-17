@@ -152,59 +152,6 @@ init_input <- function() {
                                               n_stroke = 0, hf = 0)))  #AKA longevity
   input_ref$agent$ln_h_bgd_betas <- ""
 
-  ### smoking;
-
-  input_help$smoking$logit_p_current_smoker_0_betas <- "Probability of being a current smoker at the time of creation"
-  input$smoking$logit_p_current_smoker_0_betas <- t(as.matrix(c(Intercept = -0.2, sex = -1, age = -0.02, age2 = 0, sex_age = 0,
-                                                                sex_age2 = 0, year = -0.02)))  #intercept -1.8 when age = -0.02
-  input_ref$smoking$logit_p_current_smoker_0_betas <- ""
-
-  input_help$smoking$logit_p_never_smoker_con_not_current_0_betas <- "Probability of being a never-smoker conditional on not being current smoker, at the time of creation"
-  input$smoking$logit_p_never_smoker_con_not_current_0_betas <- t(as.matrix(c(intercept = 3.7, sex = 0, age = -0.06, age2 = 0, sex_age = 0,
-                                                                              sex_age2 = 0, year = -0.02)))
-  input_ref$smoking$logit_p_never_smoker_con_not_current_0_betas <- ""
-
-
-  input_help$smoking$minimum_smoking_prevalence <- "Minimum Smoking Prevalence"
-  input$smoking$minimum_smoking_prevalence <- 0.10
-  input_ref$smoking$minimum_smoking_prevalence <- ""
-
-
-  #input_help$smoking$mortality_factor_current <- "Mortality ratio for current smokers vs. non-smokers"
-  #input$smoking$mortality_factor_current <- 1.83  #1.83
-  #input_ref$smoking$mortality_factor_current <- "Meta-analysis. doi:10.1001/archinternmed.2012.1397"
-
-  #input_help$smoking$mortality_factor_former <- "Mortality ratio for former smokers vs. non-smokers"
-  #input$smoking$mortality_factor_former <- 1.34  #1.34
-  #input_ref$smoking$mortality_factor_former <- "Meta-analysis. doi:10.1001/archinternmed.2012.1397"
-
-  input_help$smoking$mortality_factor_current  <- "Mortality ratio for current  smokers vs. non-smokers by sex and age group"
-  input$smoking$mortality_factor_current <- t(as.matrix(c(age40to49 = 1, age50to59 = 1, age60to69 = 1.94  , age70to79 = 1.86, age80p = 1.66 )))
-  input_ref$smoking$mortality_factor_current <- "Meta-analysis. doi:10.1001/archinternmed.2012.1397"
-
-  input_help$smoking$mortality_factor_former  <- "Mortality ratio for current  smokers vs. non-smokers by sex and age group"
-  input$smoking$mortality_factor_former<- t(as.matrix(c(age40to49 = 1, age50to59 = 1, age60to69 = 1.54  , age70to79 = 1.36, age80p = 1.27 )))
-  input_ref$smoking$mortality_factor_former <- "Meta-analysis. doi:10.1001/archinternmed.2012.1397"
-
-
-  input_help$smoking$pack_years_0_betas <- "Regression equations for determining the pack-years of smoking at the time of creation (for elogit_p_never_smoker_con_current_0_betas smokers)"
-  input$smoking$pack_years_0_betas <- t(as.matrix(c(intercept = 22, sex = -4, age = 0, year = -0.6, current_smoker = 10)))
-  input_ref$smoking$pack_years_0_betas <- ""
-
-
-  input_help$smoking$pack_years_0_sd <- "Standard deviation for variation in pack-years among individuals (current or former smokers)"
-  input$smoking$pack_years_0_sd <- 5
-  input_ref$smoking$pack_years_0_sd <- ""
-
-
-  input_help$smoking$ln_h_inc_betas <- "Log-hazard of starting smoking (incidence or relapse)"
-  input$smoking$ln_h_inc_betas <- c(intercept = -4, sex = -0.15, age = -0.02, age2 = 0, calendar_time = -0.01)
-  input_ref$smoking$ln_h_inc_betas <- ""
-
-
-  input_help$smoking$ln_h_ces_betas <- "Log-hazard of smoking cessation"
-  input$smoking$ln_h_ces_betas <- c(intercept = -3.7,  sex = 0, age = 0.02, age2 = 0, calendar_time = -0.01)
-  input_ref$smoking$ln_h_ces_betas <- ""
 
 
   ## COPD
