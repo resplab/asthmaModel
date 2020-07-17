@@ -19,7 +19,6 @@ Layout:
 
 #define OUTPUT_EX_BIOMETRICS 1 //height, weight etc;
 #define OUTPUT_EX_SMOKING 2
-#define OUTPUT_EX_LUNG_FUNCTION 8
 #define OUTPUT_EX_COPD 16
 #define OUTPUT_EX_MORTALITY 64
 #define OUTPUT_EX_POPULATION 256
@@ -463,42 +462,14 @@ struct input
 
   struct
   {
-    double fev1_0_prev_betas_by_sex[6][2];   //Initiating FEV1 in prevalent COPD cases (FEV1/FVC<0.7): intercept, age, height, pack_years
-    double fev1_0_prev_sd_by_sex[2];
-
-    double fev1_0_inc_betas_by_sex[6][2];   //Initiating FEV1 in incident COPD cases (FEV1/FVC=0.7): intercept, age, height, pack_years
-    double fev1_0_inc_sd_by_sex[2];
-
-    double pred_fev1_betas_by_sex[4][2]; //Predicted FEV1, intercept, age, height, RESERVED
-
-    double fev1_betas_by_sex[8][2];  //intercept, age, weight, height, height_sq, smoking_status_age*height_sq, followup_year
-    double fev1_0_ZafarCMAJ_by_sex[8][2];  //intercept, age, weight, height, height_sq, smoking_status_age*height_sq, followup_year
-
-    double dfev1_sigmas[2];
-    double dfev1_re_rho;
-  } lung_function;
-
-
-  struct
-  {
     double bg_cost_by_stage[5];
-    double exac_dcost[4];
 
-    double mi_dcost;
-    double mi_post_cost;
-    double stroke_dcost;
-    double stroke_post_dcost;
   } cost;
 
   struct
   {
     double bg_util_by_stage[5];
-    double exac_dutil[4][4];
 
-    double mi_dutil;
-    double mi_post_dutil;
-    double stroke_dutil;
-    double stroke_post_dutil;
   } utility;
 
 
@@ -544,25 +515,12 @@ List Cget_inputs()
       Rcpp::Named("ln_h_COPD_betas_by_sex")=AS_MATRIX_DOUBLE(input.COPD.ln_h_COPD_betas_by_sex),
       Rcpp::Named("logit_p_COPD_betas_by_sex")=AS_MATRIX_DOUBLE(input.COPD.logit_p_COPD_betas_by_sex)
     ),
-    Rcpp::Named("lung_function")=Rcpp::List::create(
-      Rcpp::Named("pred_fev1_betas_by_sex")=AS_MATRIX_DOUBLE(input.lung_function.pred_fev1_betas_by_sex),
-      Rcpp::Named("fev1_0_prev_betas_by_sex")=AS_MATRIX_DOUBLE(input.lung_function.fev1_0_prev_betas_by_sex),
-      Rcpp::Named("fev1_0_prev_sd_by_sex")=AS_VECTOR_DOUBLE(input.lung_function.fev1_0_prev_sd_by_sex),
-      Rcpp::Named("fev1_0_inc_betas_by_sex")=AS_MATRIX_DOUBLE(input.lung_function.fev1_0_prev_betas_by_sex),
-      Rcpp::Named("fev1_0_inc_sd_by_sex")=AS_VECTOR_DOUBLE(input.lung_function.fev1_0_prev_sd_by_sex),
-      Rcpp::Named("fev1_betas_by_sex")=AS_MATRIX_DOUBLE(input.lung_function.fev1_betas_by_sex),
-      Rcpp::Named("fev1_0_ZafarCMAJ_by_sex")=AS_MATRIX_DOUBLE(input.lung_function.fev1_0_ZafarCMAJ_by_sex),
-      Rcpp::Named("dfev1_sigmas")=AS_VECTOR_DOUBLE(input.lung_function.dfev1_sigmas),
-      Rcpp::Named("dfev1_re_rho")=input.lung_function.dfev1_re_rho
-    ),
 
     Rcpp::Named("cost")=Rcpp::List::create(
-      Rcpp::Named("bg_cost_by_stage")=AS_VECTOR_DOUBLE(input.cost.bg_cost_by_stage),
-      Rcpp::Named("exac_dcost")=AS_VECTOR_DOUBLE(input.cost.exac_dcost)
+      Rcpp::Named("bg_cost_by_stage")=AS_VECTOR_DOUBLE(input.cost.bg_cost_by_stage)
     ),
     Rcpp::Named("utility")=Rcpp::List::create(
-      Rcpp::Named("bg_util_by_stage")=AS_VECTOR_DOUBLE(input.utility.bg_util_by_stage),
-      Rcpp::Named("exac_dutil")=AS_MATRIX_DOUBLE(input.utility.exac_dutil)
+      Rcpp::Named("bg_util_by_stage")=AS_VECTOR_DOUBLE(input.utility.bg_util_by_stage)
     )
   ,
 
@@ -604,32 +562,14 @@ int Cset_input_var(std::string name, NumericVector value)
   if(name=="COPD$ln_h_COPD_betas_by_sex") READ_R_MATRIX(value,input.COPD.ln_h_COPD_betas_by_sex);
   if(name=="COPD$logit_p_COPD_betas_by_sex") READ_R_MATRIX(value,input.COPD.logit_p_COPD_betas_by_sex);
 
-  if(name=="lung_function$pred_fev1_betas_by_sex") READ_R_MATRIX(value,input.lung_function.pred_fev1_betas_by_sex);
-  if(name=="lung_function$fev1_0_prev_betas_by_sex") READ_R_MATRIX(value,input.lung_function.fev1_0_prev_betas_by_sex);
-  if(name=="lung_function$fev1_0_prev_sd_by_sex") READ_R_VECTOR(value,input.lung_function.fev1_0_prev_sd_by_sex);
-  if(name=="lung_function$fev1_0_inc_betas_by_sex") READ_R_MATRIX(value,input.lung_function.fev1_0_inc_betas_by_sex);
-  if(name=="lung_function$fev1_0_inc_sd_by_sex") READ_R_VECTOR(value,input.lung_function.fev1_0_inc_sd_by_sex);
-  if(name=="lung_function$pred_fev1_betas_by_sex") READ_R_MATRIX(value,input.lung_function.pred_fev1_betas_by_sex);
-  if(name=="lung_function$fev1_betas_by_sex") READ_R_MATRIX(value,input.lung_function.fev1_betas_by_sex);
-  if(name=="lung_function$fev1_0_ZafarCMAJ_by_sex") READ_R_MATRIX(value,input.lung_function.fev1_0_ZafarCMAJ_by_sex);
-
-  if(name=="lung_function$dfev1_sigmas") READ_R_VECTOR(value,input.lung_function.dfev1_sigmas);
-  if(name=="lung_function$dfev1_re_rho") {input.lung_function.dfev1_re_rho=value[0]; return(0);}
-
-  if(name=="cost$exac_dcost") READ_R_VECTOR(value,input.cost.exac_dcost);
 
   if(name=="utility$bg_util_by_stage") READ_R_VECTOR(value,input.utility.bg_util_by_stage);
-  if(name=="utility$exac_dutil") READ_R_MATRIX(value,input.utility.exac_dutil);
+
 
   //Define your project-specific inputs here;
 
   return(ERR_INCORRECT_INPUT_VAR);
 }
-
-
-
-
-
 
 
 //' Returns a sample output for a given year and gender.
@@ -673,20 +613,9 @@ struct agent
 
   int smoking_status;   //0:not smoking, positive: current smoking rate (py per year), note that ex smoker status os determined also by pack_years
   double pack_years;
-  double smoking_status_LPT;
 
-  double fev1;
-  double fev1_baseline;  //Derived from CanCOLD
-  //  double fev1_baseline_ZafarCMAJ;
-  double fev1_slope;  //fixed component of rate of decline;
-  double fev1_slope_t;  //time-dependent component of FEV1 decline;
-  double fev1_tail;
-  //  double fev1_decline_intercept;
-
-  double lung_function_LPT;
-  int gold;
   int local_time_at_COPD;
-  double _pred_fev1;
+
 
   int cumul_exac[4];    //0:mild, 1:moderate, 2:severe, 3: very severe;
   double cumul_exac_time[4];
@@ -706,35 +635,8 @@ struct agent
 };
 
 
-
-
-
-
 agent *agent_stack;
 long agent_stack_pointer;
-
-agent smith;
-
-
-/*
-// [[Rcpp::export]]
-int Cset_agent_var(long id, std::string name, NumericVector value)    //Imports the agent from
-{
-if(name=="local_time") {agent_stack[id].local_time=value[0]; return(0);}
-if(name=="alive") {agent_stack[id].alive=(value[0]!=0); return(0);}
-if(name=="sex") {agent_stack[id].sex=(value[0]!=0); return(0);}
-if(name=="dob") {agent_stack[id].dob=value[0]; return(0);}
-if(name=="age_at_creation") {agent_stack[id].age_at_creation=value[0]; return(0);}
-
-if(name=="event") {agent_stack[id].event=value[0]; return(0);}
-if(name=="tte") {agent_stack[id].tte=value[0]; return(0);}
-
-return(-1);
-}
-*/
-
-
-
 
 List get_agent(agent *ag)
 {
@@ -748,23 +650,13 @@ List get_agent(agent *ag)
     Rcpp::Named("weight")=(*ag).weight,
 
     Rcpp::Named("age_at_creation")=(*ag).age_at_creation,
-    Rcpp::Named("time_at_creation")=(*ag).time_at_creation,
+    Rcpp::Named("time_at_creation")=(*ag).time_at_creation
 
-    Rcpp::Named("smoking_status")=(*ag).smoking_status,
-    Rcpp::Named("pack_years")=(*ag).pack_years,
-
-    Rcpp::Named("fev1")=(*ag).fev1,
-    Rcpp::Named("fev1_slope")=(*ag).fev1_slope,
-    Rcpp::Named("fev1_slope_t")=(*ag).fev1_slope_t
   );
-  // out["fev1_decline_intercept"] = (*ag).fev1_decline_intercept;
   out["weight_baseline"] = (*ag).weight_baseline; //added here because the function "create" above can take a limited number of arguments
   out["followup_time"] = (*ag).followup_time; //added here because the function "create" above can take a limited number of arguments
   out["age_baseline"] = (*ag).age_baseline; //added here because the function "create" above can take a limited number of arguments
-  out["fev1_baseline"] = (*ag).fev1_baseline; //added for new implementation of FEV1 decline -- Shahzad!
-  // out["fev1_baseline_ZafarCMAJ"] = (*ag).fev1_baseline_ZafarCMAJ; //added for new implementation of FEV1 decline -- Shahzad!
-  out["fev1_tail"] = (*ag).fev1_tail;
-  out["gold"] = (*ag).gold;
+
   out["local_time_at_COPD"]=(*ag).local_time_at_COPD;
 
   out["cumul_cost"] = (*ag).cumul_cost;
@@ -808,12 +700,6 @@ List Cget_smith()
 }
 
 
-#define CALC_PRED_FEV1(ag) (input.lung_function.pred_fev1_betas_by_sex[0][(*ag).sex]                                                                                        \
-+input.lung_function.pred_fev1_betas_by_sex[1][(*ag).sex]*((*ag).age_at_creation+(*ag).local_time)                                                                        \
-+input.lung_function.pred_fev1_betas_by_sex[2][(*ag).sex]*((*ag).age_at_creation+(*ag).local_time)*((*ag).age_at_creation+(*ag).local_time)                               \
-+input.lung_function.pred_fev1_betas_by_sex[3][(*ag).sex]*(*ag).height*(*ag).height)
-
-
 agent *create_agent(agent *ag,int id)
 {
 double _bvn[2]; //being used for joint estimation in multiple locations;
@@ -822,17 +708,13 @@ double _bvn[2]; //being used for joint estimation in multiple locations;
 (*ag).alive=1;
 (*ag).local_time=0;
 (*ag).age_baseline = 0;
-(*ag).fev1_slope = 0;
-(*ag).fev1_slope_t = 0;//resetting the value for new agent
 
 (*ag).weight_baseline = 0; //resetting the value for new agent
 (*ag).followup_time = 0; //resetting the value for new agent
 (*ag).local_time_at_COPD = 0; //resetting the value for new agent
 
-
 (*ag).time_at_creation=calendar_time;
 (*ag).sex=rand_unif()<input.agent.p_female;
-(*ag).fev1_tail = sqrt(0.1845) * rand_norm() + 0.827;
 
 double r=rand_unif();
 double cum_p=0;
@@ -847,7 +729,6 @@ if(id<settings.n_base_agents) //the first n_base_agent cases are prevalent cases
     for(int i=input.global_parameters.age0;i<111;i++)
     {
       cum_p=cum_p+input.agent.p_incidence_age[i];
-      //if(i==40) Rprintf("r=%f,cum_p=%f\n",r,cum_p);
       if(r<cum_p) {(*ag).age_at_creation=i; break;}
     }
 
@@ -888,81 +769,7 @@ if(id<settings.n_base_agents) //the first n_base_agent cases are prevalent cases
     (*ag).followup_time = 0 ;
     (*ag).local_time_at_COPD = (*ag).local_time;
 
-    (*ag).fev1=input.lung_function.fev1_0_prev_betas_by_sex[0][(*ag).sex]
-    +input.lung_function.fev1_0_prev_betas_by_sex[1][(*ag).sex]*((*ag).age_at_creation+(*ag).local_time)
-    +input.lung_function.fev1_0_prev_betas_by_sex[2][(*ag).sex]*(*ag).height*(*ag).height
-    +input.lung_function.fev1_0_prev_betas_by_sex[3][(*ag).sex]*(*ag).pack_years
-    +rand_norm()*input.lung_function.fev1_0_prev_sd_by_sex[(*ag).sex];
-
-
-    double _beta_0=(*ag).fev1-
-    (input.lung_function.fev1_0_ZafarCMAJ_by_sex[1][(*ag).sex]*(*ag).age_baseline
-       +input.lung_function.fev1_0_ZafarCMAJ_by_sex[2][(*ag).sex]*(*ag).weight_baseline
-       +input.lung_function.fev1_0_ZafarCMAJ_by_sex[3][(*ag).sex]*(*ag).height
-       +input.lung_function.fev1_0_ZafarCMAJ_by_sex[4][(*ag).sex]*(*ag).height*(*ag).height
-       +input.lung_function.fev1_0_ZafarCMAJ_by_sex[5][(*ag).sex]*(*ag).smoking_status
-       +input.lung_function.fev1_0_ZafarCMAJ_by_sex[6][(*ag).sex]*(*ag).age_baseline*(*ag).height*(*ag).height);
-
-       double _beta_0_prime=rand_norm()*sqrt((1-input.lung_function.dfev1_re_rho*input.lung_function.dfev1_re_rho)*input.lung_function.dfev1_sigmas[1]*input.lung_function.dfev1_sigmas[1])+
-       (input.lung_function.fev1_betas_by_sex[0][(*ag).sex]+input.lung_function.dfev1_sigmas[1]/input.lung_function.dfev1_sigmas[0]*input.lung_function.dfev1_re_rho*(_beta_0-input.lung_function.fev1_0_ZafarCMAJ_by_sex[0][(*ag).sex]));
-
-       (*ag).fev1_slope=_beta_0_prime
-         +input.lung_function.fev1_betas_by_sex[1][(*ag).sex]*(*ag).age_baseline
-         +input.lung_function.fev1_betas_by_sex[2][(*ag).sex]*(*ag).weight_baseline
-         +input.lung_function.fev1_betas_by_sex[3][(*ag).sex]*(*ag).height
-         +input.lung_function.fev1_betas_by_sex[4][(*ag).sex]*(*ag).height*(*ag).height
-         +input.lung_function.fev1_betas_by_sex[5][(*ag).sex]*(*ag).smoking_status
-         +input.lung_function.fev1_betas_by_sex[6][(*ag).sex]*(*ag).age_baseline*(*ag).height*(*ag).height;
-
-         (*ag).fev1_slope_t=input.lung_function.fev1_betas_by_sex[7][(*ag).sex];
-
-         //Adjusting FEV1 tail
-          if ((*ag).fev1 < (*ag).fev1_tail) {
-          (*ag).fev1 = (*ag).fev1_tail;
-         }
-
-         //Setting values for COPD prevalence cases
-         (*ag).fev1_baseline = (*ag).fev1;
-
-         // Intercept for FEV1 decline in prevalent cases
-
-         /* double fev1_mean_bivariate = input.lung_function.fev1_betas_by_sex[0][(*ag).sex]
-         + (input.lung_function.dfev1_sigmas[1]/input.lung_function.dfev1_sigmas[0]*input.lung_function.dfev1_re_rho) * ((*ag).fev1_baseline - (*ag).fev1_baseline_ZafarCMAJ - input.lung_function.fev1_0_ZafarCMAJ_by_sex[0][(*ag).sex]);
-         double fev1_variance_bivariate =  ((1-input.lung_function.dfev1_re_rho*input.lung_function.dfev1_re_rho)*input.lung_function.dfev1_sigmas[1]*input.lung_function.dfev1_sigmas[1]);
-
-         (*ag).fev1_decline_intercept = rand_norm()*sqrt(fev1_variance_bivariate) + fev1_mean_bivariate;
-
-         // Calcuating FEV1_baseline based on Zafar's CMAJ paper, excluding the intercept term
-         (*ag).fev1_baseline_ZafarCMAJ = input.lung_function.fev1_0_ZafarCMAJ_by_sex[1][(*ag).sex]*(*ag).age_baseline
-         +input.lung_function.fev1_0_ZafarCMAJ_by_sex[2][(*ag).sex]*(*ag).weight_baseline
-         +input.lung_function.fev1_0_ZafarCMAJ_by_sex[3][(*ag).sex]*(*ag).height
-         +input.lung_function.fev1_0_ZafarCMAJ_by_sex[4][(*ag).sex]*(*ag).height*(*ag).height
-         +input.lung_function.fev1_0_ZafarCMAJ_by_sex[5][(*ag).sex]*(*ag).smoking_status
-         +input.lung_function.fev1_0_ZafarCMAJ_by_sex[6][(*ag).sex]*(*ag).age_baseline*(*ag).height*(*ag).height;
-
-         */
-
-         double pred_fev1=CALC_PRED_FEV1(ag);
-         (*ag)._pred_fev1=pred_fev1;
-
-         if ((*ag).fev1/pred_fev1<0.3) (*ag).gold=4;
-         else
-           if ((*ag).fev1/pred_fev1<0.5) (*ag).gold=3;
-           else
-             if ((*ag).fev1/pred_fev1<0.8) (*ag).gold=2;
-             else (*ag).gold=1;
   }
-  else
-  {
-    (*ag).gold=0;
-    (*ag).fev1=0;
-    (*ag)._pred_fev1=0; //restarting _pred_fev1 for new people who don't have COPD
-
-  }
-
-
-  //lung function;
-  (*ag).lung_function_LPT=0;
 
 
   //payoffs;
@@ -1061,10 +868,9 @@ struct output_ex
   int n_alive_by_ctime_age[1000][111];
   int n_current_smoker_by_ctime_sex[1000][2];
   double cumul_cost_ctime[1000];
-  double cumul_cost_gold_ctime[1000][5];
+
   double cumul_qaly_ctime[1000];
-  double cumul_qaly_gold_ctime[1000][5];
-  double sum_fev1_ltime[1000];
+
   double cumul_time_by_smoking_status[3];
   double sum_time_by_ctime_sex[100][2];
   double sum_time_by_age_sex[111][2];
@@ -1084,7 +890,6 @@ struct output_ex
   int n_inc_COPD_by_ctime_age[100][111];
   int n_COPD_by_ctime_severity[100][5]; //no COPD to GOLD 4;
   int n_COPD_by_age_sex[111][2];
-  int cumul_time_by_ctime_GOLD[100][5];
 
 #endif
 
@@ -1120,10 +925,7 @@ List Cget_output_ex()
     Rcpp::Named("n_smoking_status_by_ctime")=AS_MATRIX_INT_SIZE(output_ex.n_smoking_status_by_ctime,input.global_parameters.time_horizon),
     Rcpp::Named("n_current_smoker_by_ctime_sex")=AS_MATRIX_INT_SIZE(output_ex.n_current_smoker_by_ctime_sex,input.global_parameters.time_horizon),
     Rcpp::Named("cumul_cost_ctime")=AS_VECTOR_DOUBLE_SIZE(output_ex.cumul_cost_ctime,input.global_parameters.time_horizon),
-    Rcpp::Named("cumul_cost_gold_ctime")=AS_MATRIX_DOUBLE_SIZE(output_ex.cumul_cost_gold_ctime,input.global_parameters.time_horizon),
     Rcpp::Named("cumul_qaly_ctime")=AS_VECTOR_DOUBLE_SIZE(output_ex.cumul_qaly_ctime,input.global_parameters.time_horizon),
-    Rcpp::Named("cumul_qaly_gold_ctime")=AS_MATRIX_DOUBLE_SIZE(output_ex.cumul_qaly_gold_ctime,input.global_parameters.time_horizon),
-    Rcpp::Named("sum_fev1_ltime")=AS_VECTOR_DOUBLE_SIZE(output_ex.sum_fev1_ltime,input.global_parameters.time_horizon),
     Rcpp::Named("cumul_time_by_smoking_status")=AS_VECTOR_DOUBLE(output_ex.cumul_time_by_smoking_status),
     Rcpp::Named("cumul_non_COPD_time")=output_ex.cumul_non_COPD_time,
     Rcpp::Named("sum_p_COPD_by_ctime_sex")=AS_MATRIX_DOUBLE_SIZE(output_ex.sum_p_COPD_by_ctime_sex,input.global_parameters.time_horizon),
@@ -1145,15 +947,12 @@ List Cget_output_ex()
     out["n_COPD_by_ctime_age"]=AS_MATRIX_INT_SIZE(output_ex.n_COPD_by_ctime_age,input.global_parameters.time_horizon),
     out["n_inc_COPD_by_ctime_age"]=AS_MATRIX_INT_SIZE(output_ex.n_inc_COPD_by_ctime_age,input.global_parameters.time_horizon),
     out["n_COPD_by_ctime_severity"]=AS_MATRIX_INT_SIZE(output_ex.n_COPD_by_ctime_severity,input.global_parameters.time_horizon),
-    out["n_COPD_by_age_sex"]=AS_MATRIX_INT(output_ex.n_COPD_by_age_sex),
-    out("cumul_time_by_ctime_GOLD")=AS_MATRIX_INT_SIZE(output_ex.cumul_time_by_ctime_GOLD,input.global_parameters.time_horizon);
+    out["n_COPD_by_age_sex"]=AS_MATRIX_INT(output_ex.n_COPD_by_age_sex);
 
 #endif
 
-
     return(out);
 }
-
 
 
 //This function must run ONLY on start and fixed events; any other place and will mess up!
@@ -1181,11 +980,7 @@ void update_output_ex(agent *ag)
         output_ex.n_smoking_status_by_ctime[time][0]+=1;
 
       output_ex.cumul_cost_ctime[time]+=(*ag).annual_cost;
-      output_ex.cumul_cost_gold_ctime[time][(*ag).gold]+=(*ag).annual_cost;
       output_ex.cumul_qaly_ctime[time]+=(*ag).annual_qaly;
-      output_ex.cumul_qaly_gold_ctime[time][(*ag).gold]+=(*ag).annual_qaly;
-
-      output_ex.sum_fev1_ltime[local_time]+=(*ag).fev1;
 
       double odds=exp(input.COPD.logit_p_COPD_betas_by_sex[0][(*ag).sex]
                         +input.COPD.logit_p_COPD_betas_by_sex[1][(*ag).sex]*((*ag).age_at_creation+(*ag).local_time)
@@ -1203,11 +998,8 @@ void update_output_ex(agent *ag)
 #endif
 
 #if (OUTPUT_EX & OUTPUT_EX_COPD)>0
-      output_ex.n_COPD_by_ctime_sex[time][(*ag).sex]+=((*ag).gold>0)*1;
-      output_ex.n_COPD_by_ctime_age[time][age-1]+=((*ag).gold>0)*1;
-      output_ex.n_COPD_by_ctime_severity[time][((*ag).gold)]+=1;
+
       output_ex.n_COPD_by_age_sex[age-1][(*ag).sex]+=1;
-      if((*ag).local_time>0) output_ex.cumul_time_by_ctime_GOLD [time][((*ag).gold)]+=1;
 #endif
 
   }
@@ -1223,68 +1015,8 @@ void update_output_ex(agent *ag)
 /////////////////////////////////////////////////////////////////////////LPTs////////////////////////////////////////////////////////////////////////////////
 
 
-
-void lung_function_LPT(agent *ag)
-{
-  if((*ag).gold==0)
-  {
-    //We are not currently modeling lung funciton in non-COPD patients. Everything starts when gold>0;
-  }
-  else  //apply LHS equations
-  {
-
-    //Applying FEV1 decline
-    //  double dt=(*ag).local_time-(*ag).lung_function_LPT;
-    //    (*ag).fev1=(*ag).fev1 + (*ag).fev1_slope*dt + 2*(*ag).fev1_slope_t*(*ag).local_time*dt + (*ag).fev1_slope_t*dt*dt;
-
-    (*ag).followup_time=(*ag).local_time-(*ag).local_time_at_COPD;
-
-    double dt = ((*ag).local_time-(*ag).lung_function_LPT);
-
-    (*ag).fev1=(*ag).fev1 + dt*(*ag).fev1_slope + 2 * (*ag).fev1_slope_t * (*ag).followup_time * dt + (*ag).fev1_slope_t * dt * dt;
-
-    //Adjusting FEV1 tail
-       if ((*ag).fev1 < (*ag).fev1_tail) {
-          (*ag).fev1 = (*ag).fev1_tail;
-       }
-
-
-    double pred_fev1=CALC_PRED_FEV1(ag);
-    (*ag)._pred_fev1=pred_fev1;
-    if ((*ag).fev1/pred_fev1<0.3) (*ag).gold=4;
-    else
-      if ((*ag).fev1/pred_fev1<0.5) (*ag).gold=3;
-      else
-        if ((*ag).fev1/pred_fev1<0.8) (*ag).gold=2;
-        else (*ag).gold=1;
-  }
-  (*ag).lung_function_LPT=(*ag).local_time;
-}
-
-
-void smoking_LPT(agent *ag)
-{
-#ifdef OUTPUT_EX
-  if((*ag).smoking_status==0) output_ex.cumul_time_by_smoking_status[0]+=(*ag).local_time-(*ag).smoking_status_LPT;
-  else
-    if((*ag).pack_years>0) output_ex.cumul_time_by_smoking_status[2]+=(*ag).local_time-(*ag).smoking_status_LPT;
-    else output_ex.cumul_time_by_smoking_status[1]+=(*ag).local_time-(*ag).smoking_status_LPT;
-#endif
-
-    (*ag).pack_years+=(*ag).smoking_status*((*ag).local_time-(*ag).smoking_status_LPT);
-    (*ag).smoking_status_LPT=(*ag).local_time;
-}
-
-
 void payoffs_LPT(agent *ag)
 {
-  (*ag).cumul_cost+=input.cost.bg_cost_by_stage[(*ag).gold]*((*ag).local_time-(*ag).payoffs_LPT)/pow(1+input.global_parameters.discount_cost,(*ag).local_time+calendar_time);
-  (*ag).cumul_qaly+=input.utility.bg_util_by_stage[(*ag).gold]*((*ag).local_time-(*ag).payoffs_LPT)/pow(1+input.global_parameters.discount_qaly,(*ag).local_time+calendar_time);
-
-
-  //annual cost and qaly
-  (*ag).annual_cost+=input.cost.bg_cost_by_stage[(*ag).gold]*((*ag).local_time-(*ag).payoffs_LPT)/pow(1+input.global_parameters.discount_cost,(*ag).local_time+calendar_time);
-  (*ag).annual_qaly+=input.utility.bg_util_by_stage[(*ag).gold]*((*ag).local_time-(*ag).payoffs_LPT)/pow(1+input.global_parameters.discount_qaly,(*ag).local_time+calendar_time);
 
 
   (*ag).payoffs_LPT=(*ag).local_time;
@@ -1340,11 +1072,9 @@ agent *event_end_process(agent *ag)
 {
 
   ++output.n_agents;
-  output.n_COPD+=((*ag).gold>0)*1;
   output.cumul_time+=(*ag).local_time;
   output.n_deaths+=!(*ag).alive;
 
-  lung_function_LPT(ag);
 
   payoffs_LPT(ag);
 
@@ -1370,14 +1100,9 @@ agent *event_end_process(agent *ag)
   //If it falls after that still we ignore as it is a partially observed year.
 #endif
 #if OUTPUT_EX>1
-  //  output_ex.cumul_cost_ctime[input.global_parameters.time_horizon-1]+=(*ag).cumul_cost; // accounting for residual last year, for consistency with output.total_qaly and   output.total_cost
-  //  output_ex.cumul_cost_gold_ctime[input.global_parameters.time_horizon-1][(*ag).gold]+=(*ag).cumul_cost;
-  //  output_ex.cumul_qaly_ctime[input.global_parameters.time_horizon-1]+=(*ag).cumul_qaly;
-  //  output_ex.cumul_qaly_gold_ctime[input.global_parameters.time_horizon-1][(*ag).gold]+=(*ag).cumul_qaly;
 
   int age=floor((*ag).local_time+(*ag).age_at_creation);
   //Rprintf("age at death=%f\n",age);
-  if((*ag).gold==0) output_ex.cumul_non_COPD_time+=(*ag).local_time;
   if((*ag).alive==false)  output_ex.n_death_by_age_sex[age-1][(*ag).sex]+=1;
 
   double time=(*ag).time_at_creation+(*ag).local_time;
@@ -1529,7 +1254,6 @@ NumericMatrix Cget_all_events_matrix()
   NumericMatrix outm(event_stack_pointer,25);
   CharacterVector eventMatrixColNames(25);
 
-// eventMatrixColNames = CharacterVector::create("id", "local_time","sex", "time_at_creation", "age_at_creation", "pack_years","gold","event","FEV1","FEV1_slope", "FEV1_slope_t","pred_FEV1","smoking_status", "localtime_at_COPD", "age_at_COPD", "weight_at_COPD", "height","followup_after_COPD", "FEV1_baseline");
 // 'create' helper function is limited to 20 enteries
 
   eventMatrixColNames(0)  = "id";
@@ -1538,19 +1262,12 @@ NumericMatrix Cget_all_events_matrix()
   eventMatrixColNames(3)  = "time_at_creation";
   eventMatrixColNames(4)  = "age_at_creation";
   eventMatrixColNames(5)  = "pack_years";
-  eventMatrixColNames(6)  = "gold";
   eventMatrixColNames(7)  = "event";
-  eventMatrixColNames(8)  = "FEV1";
-  eventMatrixColNames(9)  = "FEV1_slope";
-  eventMatrixColNames(10) = "FEV1_acceleration";
-  eventMatrixColNames(11) = "pred_FEV1";
-  eventMatrixColNames(12) = "smoking_status";
   eventMatrixColNames(13) = "localtime_at_COPD";
   eventMatrixColNames(14) = "age_at_COPD";
   eventMatrixColNames(15) = "weight_at_COPD";
   eventMatrixColNames(16) = "height";
   eventMatrixColNames(17) = "followup_after_COPD";
-  eventMatrixColNames(18) = "FEV1_baseline";
 
 
   colnames(outm) = eventMatrixColNames;
@@ -1562,20 +1279,15 @@ NumericMatrix Cget_all_events_matrix()
     outm(i,2)=(*ag).sex;
     outm(i,3)=(*ag).time_at_creation;
     outm(i,4)=(*ag).age_at_creation;
-    outm(i,5)=(*ag).pack_years;
-    outm(i,6)=(*ag).gold;
+
     outm(i,7)=(*ag).event;
-    outm(i,8)=(*ag).fev1;
-    outm(i,9)=(*ag).fev1_slope;
-    outm(i,10)=(*ag).fev1_slope_t;
-    outm(i,11)=(*ag)._pred_fev1;
-    outm(i,12)=(*ag).smoking_status;
+
     outm(i,13)=(*ag).local_time_at_COPD;
     outm(i,14)=(*ag).age_baseline;
     outm(i,15)=(*ag).weight_baseline;
     outm(i,16)=(*ag).height;
     outm(i,17)=(*ag).followup_time;
-    outm(i,18)=(*ag).fev1_baseline;
+
   }
 
   return(outm);
@@ -1586,7 +1298,6 @@ NumericMatrix Cget_all_events_matrix()
 //////////////////////////////////////////////////////////////////EVENT_COPD////////////////////////////////////;
 double event_COPD_tte(agent *ag)
 {
-  if((*ag).gold>0) return(HUGE_VAL);
 
   double rate=exp(input.COPD.ln_h_COPD_betas_by_sex[0][(*ag).sex]
                     +input.COPD.ln_h_COPD_betas_by_sex[1][(*ag).sex]*((*ag).age_at_creation+(*ag).local_time)
@@ -1612,79 +1323,6 @@ void event_COPD_process(agent *ag)
   (*ag).followup_time = 0 ;
   (*ag).local_time_at_COPD = (*ag).local_time;
 
-  (*ag).fev1=input.lung_function.fev1_0_inc_betas_by_sex[0][(*ag).sex]
-  +input.lung_function.fev1_0_inc_betas_by_sex[1][(*ag).sex]*((*ag).age_at_creation+(*ag).local_time)
-  +input.lung_function.fev1_0_inc_betas_by_sex[2][(*ag).sex]*(*ag).height*(*ag).height
-  +input.lung_function.fev1_0_inc_betas_by_sex[3][(*ag).sex]*(*ag).pack_years
-  +rand_norm()*input.lung_function.fev1_0_inc_sd_by_sex[(*ag).sex];
-
-  double _beta_0=(*ag).fev1-
-  (input.lung_function.fev1_0_ZafarCMAJ_by_sex[1][(*ag).sex]*(*ag).age_baseline
-     +input.lung_function.fev1_0_ZafarCMAJ_by_sex[2][(*ag).sex]*(*ag).weight_baseline
-     +input.lung_function.fev1_0_ZafarCMAJ_by_sex[3][(*ag).sex]*(*ag).height
-     +input.lung_function.fev1_0_ZafarCMAJ_by_sex[4][(*ag).sex]*(*ag).height*(*ag).height
-     +input.lung_function.fev1_0_ZafarCMAJ_by_sex[5][(*ag).sex]*(*ag).smoking_status
-     +input.lung_function.fev1_0_ZafarCMAJ_by_sex[6][(*ag).sex]*(*ag).age_baseline*(*ag).height*(*ag).height);
-
-     double _beta_0_prime=rand_norm()*sqrt((1-input.lung_function.dfev1_re_rho*input.lung_function.dfev1_re_rho)*input.lung_function.dfev1_sigmas[1]*input.lung_function.dfev1_sigmas[1])+
-     (input.lung_function.fev1_betas_by_sex[0][(*ag).sex]+input.lung_function.dfev1_sigmas[1]/input.lung_function.dfev1_sigmas[0]*input.lung_function.dfev1_re_rho*(_beta_0-input.lung_function.fev1_0_ZafarCMAJ_by_sex[0][(*ag).sex]));
-
-     (*ag).fev1_slope=_beta_0_prime
-       +input.lung_function.fev1_betas_by_sex[1][(*ag).sex]*(*ag).age_baseline
-       +input.lung_function.fev1_betas_by_sex[2][(*ag).sex]*(*ag).weight_baseline
-       +input.lung_function.fev1_betas_by_sex[3][(*ag).sex]*(*ag).height
-       +input.lung_function.fev1_betas_by_sex[4][(*ag).sex]*(*ag).height*(*ag).height
-       +input.lung_function.fev1_betas_by_sex[5][(*ag).sex]*(*ag).smoking_status
-       +input.lung_function.fev1_betas_by_sex[6][(*ag).sex]*(*ag).age_baseline*(*ag).height*(*ag).height;
-
-       (*ag).fev1_slope_t=input.lung_function.fev1_betas_by_sex[7][(*ag).sex];
-
-       //Adjusting FEV1 tail
-         if ((*ag).fev1 < (*ag).fev1_tail) {
-          (*ag).fev1 = (*ag).fev1_tail;
-          }
-
-       double pred_fev1=CALC_PRED_FEV1(ag);
-       (*ag)._pred_fev1=pred_fev1;
-       if ((*ag).fev1/pred_fev1<0.3) (*ag).gold=4;
-       else
-         if ((*ag).fev1/pred_fev1<0.5) (*ag).gold=3;
-         else
-           if ((*ag).fev1/pred_fev1<0.8) (*ag).gold=2;
-           else (*ag).gold=1;
-
-           // FEV Decline
-
-           (*ag).fev1_baseline = (*ag).fev1;
-
-           // Intercept for FEv1 decline in COPD incidence cases
-           // double fev1_mean_bivariate = input.lung_function.fev1_betas_by_sex[0][(*ag).sex]
-           // + (input.lung_function.dfev1_sigmas[1]/input.lung_function.dfev1_sigmas[0]*input.lung_function.dfev1_re_rho) * ((*ag).fev1_baseline - (*ag).fev1_baseline_ZafarCMAJ - input.lung_function.fev1_0_ZafarCMAJ_by_sex[0][(*ag).sex]);
-           //
-           // double fev1_variance_bivariate = ((1-input.lung_function.dfev1_re_rho*input.lung_function.dfev1_re_rho)*input.lung_function.dfev1_sigmas[1]*input.lung_function.dfev1_sigmas[1]);
-
-           // (*ag).fev1_decline_intercept = 0*rand_norm()*sqrt(fev1_variance_bivariate) + 0*fev1_mean_bivariate;
-           //
-           // // Calcuating FEV1_baseline based on Zafar's CMAJ paper, excluding the intercept term
-           // (*ag).fev1_baseline_ZafarCMAJ = input.lung_function.fev1_0_ZafarCMAJ_by_sex[1][(*ag).sex]*(*ag).age_baseline
-           //   +input.lung_function.fev1_0_ZafarCMAJ_by_sex[2][(*ag).sex]*(*ag).weight_baseline
-           //   +input.lung_function.fev1_0_ZafarCMAJ_by_sex[3][(*ag).sex]*(*ag).height
-           //   +input.lung_function.fev1_0_ZafarCMAJ_by_sex[4][(*ag).sex]*(*ag).height*(*ag).height
-           //   +input.lung_function.fev1_0_ZafarCMAJ_by_sex[5][(*ag).sex]*(*ag).smoking_status
-           //   +input.lung_function.fev1_0_ZafarCMAJ_by_sex[6][(*ag).sex]*(*ag).age_baseline*(*ag).height*(*ag).height;
-           //
-           // (*ag).fev1_slope=  (*ag).fev1_decline_intercept
-           // +input.lung_function.fev1_betas_by_sex[1][(*ag).sex]*(*ag).age_baseline
-           // +input.lung_function.fev1_betas_by_sex[2][(*ag).sex]*(*ag).weight_baseline
-           // +input.lung_function.fev1_betas_by_sex[3][(*ag).sex]*(*ag).height
-           // +input.lung_function.fev1_betas_by_sex[4][(*ag).sex]*(*ag).height*(*ag).height
-           // +input.lung_function.fev1_betas_by_sex[5][(*ag).sex]*(*ag).smoking_status
-           // +input.lung_function.fev1_betas_by_sex[6][(*ag).sex]*(*ag).age_baseline*(*ag).height*(*ag).height;
-           //Follow_up term is not used here because this part of code is executed once and should be time independent
-
-
-
-           (*ag).lung_function_LPT=(*ag).local_time;
 
 #if OUTPUT_EX>1
            output_ex.cumul_non_COPD_time+=(*ag).local_time;
@@ -1749,8 +1387,6 @@ agent *event_fixed_process(agent *ag)
   (*ag).weight+=input.agent.weight_0_betas[6];
   (*ag).weight_LPT=(*ag).local_time;
 
-  lung_function_LPT(ag);
-  smoking_LPT(ag);
   payoffs_LPT(ag);
 
 #ifdef OUTPUT_EX
@@ -2026,8 +1662,6 @@ int Cmodel(int max_n_agents)
 
         if(settings.update_continuous_outcomes_mode==1)
         {
-          lung_function_LPT(ag);
-          smoking_LPT(ag);
           payoffs_LPT(ag);
         }
 
