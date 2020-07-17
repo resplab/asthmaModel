@@ -277,50 +277,6 @@ init_input <- function() {
   input_ref$exacerbation$logit_p_death_by_sex <- ""
 
 
-  # medication log-hazard regression matrix for initiation of each medication
-
-  template = c(int = 0, sex = 0, age = 0, med_class = rep(0, length(medication_classes)))
-  mx <- NULL
-  for (i in medication_classes) mx <- rbind(mx, template)
-
-  input$medication$ln_h_start_betas_by_class <- mx
-  input$medication$ln_h_stop_betas_by_class <- mx
-  input$medication$ln_rr_exac_by_class <- rep(log(1), length(medication_classes))  #TODO: update this to represent different medication effect
-
-
-  ### comorbidity mi
-  input$comorbidity$logit_p_mi_betas_by_sex = cbind(male = c(intercept = -3000, age = 0.001, age2 = 0, pack_years = 0.01, smoking = 0.001,
-                                                             calendar_time = 0, bmi = 0, gold = 0.05), female = c(intercept = -3000, age = 0.001, age2 = 0, pack_years = 0.01, smoking = 0.001,
-                                                                                                                  calendar_time = 0, bmi = 0, gold = 0.05))
-  input$comorbidity$ln_h_mi_betas_by_sex = cbind(male = c(intercept = -10000.748, age = 0.1133, age2 = -0.00044, pack_years = 0.01,
-                                                          smoking = 0.70953, calendar_time = 0, bmi = 0.01, gold = 0.05, b_mi = 0.5, n_mi = 0), female = c(intercept = -30000, age = 0.001,
-                                                                                                                                                           age2 = 0, pack_years = 0.01, smoking = 0.61868, calendar_time = 0, bmi = 0.01, gold = 0.05, b_mi = 0, n_mi = 0.01))
-  input$comorbidity$p_mi_death <- 0.05
-
-
-  #stroke
-  input$comorbidity$logit_p_stroke_betas_by_sex=cbind(
-    male=c(intercept=-3000, age=0.001, age2=0, pack_years=0.01, smoking=0.001, calendar_time=0, b_mi=0, gold=0.05, b_mi=0, n_mi=0),
-    female=c(intercept=-3000, age=0.001, age2=0, pack_years=0.01, smoking=0.001, calendar_time=0, bmi=0.01, gold=0.05, b_mi=0, n_mi=0)
-  );
-  input$comorbidity$ln_h_stroke_betas_by_sex=cbind(
-    male=c(intercept=-3000, age=0.001, age2=0, pack_years=0.01, smoking=0.001, calendar_time=0, bmi=0.01, gold=0.05, b_mi=0, n_mi=0.01, b_stroke=0, n_stroke=0),
-    female=c(intercept=-3000, age=0.001, age2=0, pack_years=0.01, smoking=0.001, calendar_time=0, bmi=0.01, gold=0.05, b_mi=0, n_mi=0.01, b_stroke=0, n_stroke=0)
-  );
-  input$comorbidity$p_stroke_death<-0.18;
-
-
-  #hf
-  input$comorbidity$logit_p_hf_betas_by_sex=cbind(
-    male=c(intercept=-3000, age=0.001, age2=0, pack_years=0.01, smoking=0.001, calendar_time=0, bmi=0.01, gold=0.05, b_mi=0, n_mi=0.01, b_stroke=0, n_stroke=0),
-    female=c(intercept=-3000, age=0.001, age2=0, pack_years=0.01, smoking=0.001, calendar_time=0, bmi=0.01, gold=0.05, b_mi=0, n_mi=0.01, b_stroke=0, n_stroke=0)
-  );
-  input$comorbidity$ln_h_hf_betas_by_sex=cbind(
-    male=c(intercept=-3000, age=0.001, age2=0, pack_years=0.01, smoking=0.001, calendar_time=0, bmi=0.01, gold=0.05,b_mi=0, n_mi=0.01, b_stroke=0, n_stroke=0),
-    female=c(intercept=-3000, age=0.001, age2=0, pack_years=0.01, smoking=0.001, calendar_time=0, bmi=0.01, gold=0.05,b_mi=0, n_mi=0.01, b_stroke=0, n_stroke=0)
-  );
-
-
   ##cost and utility
   input$cost$bg_cost_by_stage=t(as.matrix(c(N=0, I=615, II=1831, III=2619, IV=3021)))
   input_help$cost$bg_cost_by_stage="Annual direct costs for non-COPD, and COPD by GOLD grades"
