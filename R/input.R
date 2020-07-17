@@ -1,5 +1,5 @@
 # The following declarations are already defined in mode.WIP.cpp
-# they are replicated here to make it compatible with the pakcage. Amin
+# they are replicated here to make it compatible with the package. Amin
 
 record_mode<-c(
   record_mode_none=0,
@@ -7,7 +7,6 @@ record_mode<-c(
   record_mode_event=2,
   record_mode_some_event=3
 )
-
 
 events<-c(
   event_start=0,
@@ -28,7 +27,6 @@ agent_creation_mode<-c(
 )
 
 
-
 errors<-c(
   ERR_INCORRECT_SETTING_VARIABLE=-1,
   ERR_INCORRECT_VECTOR_SIZE=-2,
@@ -38,7 +36,6 @@ errors<-c(
 )
 
 # End of declarations
-
 
 #' Returns a list of default model input values
 #' @param None
@@ -117,7 +114,6 @@ init_input <- function() {
                                                                     0.05669, 0.06338, 0.07091, 0.0794, 0.08897, 0.09977, 0.11196, 0.12542, 0.13991, 0.15541, 0.1719, 0.18849, 0.20653, 0.22549,
                                                                     0.24526, 0.26571, 0.28671, 0.3081, 0.3297, 0.35132, 0.3728, 0.39395, 0.41461, 0.43462, 0.45386, 0.47222, 1))
   input_ref$agent$p_bgd_by_sex <- "Life table"
-
 
   input_help$agent$l_inc_betas <- "Ln of incidence rate of the new population - Calibration target to keep populatoin size and age pyramid in line with calibration"
   input$agent$l_inc_betas <- t(as.matrix(c(intercept = -3.55, y = 0.01, y2 = 0))) # intercept is the result of model calibration,

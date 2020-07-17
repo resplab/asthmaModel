@@ -59,11 +59,6 @@ sanity_check <- function() {
 }
 
 
-
-
-
-
-
 #' Returns results of validation tests for population module
 #' @param incidence_k a number (default=1) by which the incidence rate of population will be multiplied.
 #' @param remove_COPD 0 or 1, indicating whether COPD-caused mortality should be removed

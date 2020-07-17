@@ -4,8 +4,6 @@ session_env<-new.env()
 session_env$global_error_code_chain<-NULL
 session_env$global_error_message_chain<-NULL
 
-
-
 # Cleaning up when package unloads
 .onUnload <- function(libpath) {
   library.dynam.unload("asthmaModel", libpath)
@@ -57,7 +55,6 @@ terminate_session <- function() {
   return(Cdeallocate_resources())
 }
 
-
 apply_settings <- function(settings = settings) {
   res <- 0
   ls <- Cget_settings()
@@ -73,8 +70,6 @@ apply_settings <- function(settings = settings) {
   return(res)
 }
 
-
-
 update_run_env_setting <- function(setting_var, value) {
   res <- Cset_settings_var(setting_var, value)
   if (res < 0)
@@ -82,9 +77,6 @@ update_run_env_setting <- function(setting_var, value) {
   settings[setting_var] <<- value
   return(0)
 }
-
-
-
 
 #' Get list elements
 #' @param ls ls
@@ -103,7 +95,6 @@ get_list_elements <- function(ls, running_name = "") {
   }
   return(out)
 }
-
 
 set_Cmodel_inputs <- function(ls) {
   if(length(ls)==0) return(0)
@@ -149,8 +140,6 @@ express_matrix <- function(mtx) {
   }
 }  #Takes a named matrix and write the R code to populate it; good for generating input expressions from calibration results
 
-
-
 #' Returns events specific to an agent.
 #' @param id Agent number
 #' @return dataframe consisting all events specific to agent \code{id}
@@ -182,8 +171,6 @@ get_all_events <- function() {
   names(data) <- names(x[[1]])
   return(data)
 }
-
-
 
 #' Runs the model, after a session has been initialized.
 #' @param max_n_agents maximum number of agents
@@ -219,11 +206,7 @@ run <- function(max_n_agents = NULL, input = NULL) {
   }
 
   return(res)
-
 }
-
-
-
 
 #' Resumes running of model.
 #' @param max_n_agents maximum number of agents
@@ -238,9 +221,6 @@ resume <- function(max_n_agents = NULL) {
   }
   return(res)
 }
-
-
-
 
 # processes input and returns the processed one
 process_input <- function(ls, decision = 1)
@@ -258,23 +238,17 @@ process_input <- function(ls, decision = 1)
   return(ls)
 }
 
-
-
-
 reset_errors<-function()
 {
   session_env$global_error_code_chain<-NULL
   session_env$global_error_message_chain<-NULL
 }
 
-
-
 set_error <- function(error_code, error_message="")
 {
   session_env$global_error_code_chain<-c(session_env$global_error_code_chain,error_code)
   session_env$global_error_message_chain<-c(session_env$global_error_message_chain,error_message)
 }
-
 
 #' Returns errors
 #' @return a text with description of error messages
@@ -283,4 +257,3 @@ get_errors <- function()
 {
   return(cbind(session_env$global_error_code_chain,session_env$global_error_message_chain))
 }
-
